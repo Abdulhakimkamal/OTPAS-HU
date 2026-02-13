@@ -1,0 +1,85 @@
+import express from 'express';
+import helmet from 'helmet';
+import cors from 'cors';
+import rateLimit from 'express-rate-limit';
+import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+import authRoutes from './src/routes/authRoutes.js';
+import studentRoutes from './src/routes/studentRoutes.js';
+import instructorRoutes from './src/routes/instructorRoutes.js';
+import adminRoutes from './src/routes/adminRoutes.js';
+import departmentHeadRoutes from './src/routes/departmentHeadRoutes.js';
+import superAdminRoutes from './src/routes/superAdminRoutes.js';
+import messageRoutes from './src/routes/messageRoutes.js';
+import tutorialFilesRoutes from './src/routes/tutorialFilesRoutes.js';
+import { errorHandler, notFoundHandler } from './src/middleware/errorHandler.js';
+
+dotenv.config();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const app = express();
+
+// Security Middleware
+app.use(helmet());
+app.use(cors({
+  origin: [
+    'http://localhost:8080',
+    'http://localhost:8081',
+    'http://127.0.0.1:8080',
+    'http://127.0.0.1:8081',
+    /^http:\/\/192\.168\.\d+\.\d+:808[01]$/,
+    /^http:\/\/10\.\d+\.\d+\.\d+:808[01]$/,
+    /^http:\/\/172\.\d+\.\d+\.\d+:808[01]$/
+  ],
+  credentials: true,
+}));
+
+// Rate Limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 500, // limit each IP to 500 requests per windowMs (increased for development)
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+app.use(limiter);
+
+// Body Parser
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+
+// Request logging middleware
+app.use((req, res, next) => {
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
+  if (req.method === 'POST' || req.method === 'PUT') {
+    console.log('Request body:', JSON.stringify(req.body));
+  }
+  next();
+});
+
+// Serve uploaded files statically
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/student', studentRoutes);
+app.use('/api/instructor', instructorRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/super-admin', superAdminRoutes);
+app.use('/api/department-head', departmentHeadRoutes);
+app.use('/api/messages', messageRoutes);
+app.use('/api/tutorial-files', tutorialFilesRoutes);
+
+// Health Check
+app.get('/api/health', (req, res) => {
+  res.status(200).json({ success: true, message: 'Server is running' });
+});
+
+// Error Handling
+app.use(notFoundHandler);
+app.use(errorHandler);
+
+export default app;

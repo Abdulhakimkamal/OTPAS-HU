@@ -1,0 +1,254 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* OTPAS-HU Design System
+   Academic-style university theme with deep navy, gold accents
+   Clean, professional, and trustworthy
+*/
+
+@layer base {
+  :root {
+    /* Core backgrounds */
+    --background: 220 20% 98%;
+    --foreground: 222 47% 11%;
+
+    /* Cards with subtle warmth */
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+
+    /* Popovers */
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+
+    /* Primary: Deep Navy Blue - institutional, trustworthy */
+    --primary: 224 71% 20%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Secondary: Slate Gray */
+    --secondary: 215 20% 95%;
+    --secondary-foreground: 222 47% 11%;
+
+    /* Muted: Soft gray for backgrounds */
+    --muted: 220 15% 95%;
+    --muted-foreground: 215 16% 47%;
+
+    /* Accent: University Gold */
+    --accent: 43 96% 56%;
+    --accent-foreground: 222 47% 11%;
+
+    /* Destructive: Warm red */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* Borders and inputs */
+    --border: 220 13% 90%;
+    --input: 220 13% 90%;
+    --ring: 224 71% 20%;
+
+    --radius: 0.625rem;
+
+    /* Sidebar styling */
+    --sidebar-background: 224 71% 15%;
+    --sidebar-foreground: 220 20% 95%;
+    --sidebar-primary: 43 96% 56%;
+    --sidebar-primary-foreground: 222 47% 11%;
+    --sidebar-accent: 224 50% 25%;
+    --sidebar-accent-foreground: 220 20% 95%;
+    --sidebar-border: 224 50% 25%;
+    --sidebar-ring: 43 96% 56%;
+
+    /* Custom semantic colors */
+    --success: 160 84% 39%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+    --info: 199 89% 48%;
+    --info-foreground: 0 0% 100%;
+
+    /* Role colors */
+    --role-admin: 224 71% 20%;
+    --role-head: 262 83% 58%;
+    --role-instructor: 160 84% 39%;
+    --role-student: 199 89% 48%;
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(224 71% 20%), hsl(224 71% 35%));
+    --gradient-accent: linear-gradient(135deg, hsl(43 96% 56%), hsl(38 92% 50%));
+    --gradient-hero: linear-gradient(135deg, hsl(224 71% 15%), hsl(224 71% 25%) 50%, hsl(262 30% 20%));
+    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%), hsl(220 20% 98%));
+  }
+
+  .dark {
+    --background: 224 47% 8%;
+    --foreground: 220 20% 95%;
+
+    --card: 224 47% 12%;
+    --card-foreground: 220 20% 95%;
+
+    --popover: 224 47% 10%;
+    --popover-foreground: 220 20% 95%;
+
+    --primary: 43 96% 56%;
+    --primary-foreground: 224 47% 8%;
+
+    --secondary: 224 30% 18%;
+    --secondary-foreground: 220 20% 95%;
+
+    --muted: 224 30% 15%;
+    --muted-foreground: 215 20% 60%;
+
+    --accent: 43 96% 50%;
+    --accent-foreground: 224 47% 8%;
+
+    --destructive: 0 62% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 224 30% 20%;
+    --input: 224 30% 20%;
+    --ring: 43 96% 56%;
+
+    --sidebar-background: 224 47% 6%;
+    --sidebar-foreground: 220 20% 95%;
+    --sidebar-primary: 43 96% 56%;
+    --sidebar-primary-foreground: 224 47% 8%;
+    --sidebar-accent: 224 30% 15%;
+    --sidebar-accent-foreground: 220 20% 95%;
+    --sidebar-border: 224 30% 15%;
+    --sidebar-ring: 43 96% 56%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    @apply scroll-smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display font-semibold tracking-tight;
+  }
+}
+
+@layer components {
+  /* Glass morphism card effect */
+  .glass-card {
+    @apply bg-card/80 backdrop-blur-xl border border-border/50 shadow-lg;
+  }
+
+  /* Gradient text */
+  .text-gradient {
+    @apply bg-clip-text text-transparent;
+    background-image: var(--gradient-primary);
+  }
+
+  .text-gradient-accent {
+    @apply bg-clip-text text-transparent;
+    background-image: var(--gradient-accent);
+  }
+
+  /* Stat cards with subtle animations */
+  .stat-card {
+    @apply relative overflow-hidden rounded-xl bg-card p-6 shadow-sm border border-border/50 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5;
+  }
+
+  .stat-card::before {
+    content: '';
+    @apply absolute inset-0 opacity-0 transition-opacity duration-300;
+    background: var(--gradient-card);
+  }
+
+  .stat-card:hover::before {
+    @apply opacity-100;
+  }
+
+  /* Dashboard sidebar link */
+  .sidebar-link {
+    @apply flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground/80 transition-all duration-200 hover:bg-sidebar-accent hover:text-sidebar-foreground;
+  }
+
+  .sidebar-link.active {
+    @apply bg-sidebar-accent text-sidebar-foreground font-medium;
+  }
+
+  /* Role badge variants */
+  .role-badge {
+    @apply inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium;
+  }
+
+  .role-badge-admin {
+    @apply bg-primary/10 text-primary;
+  }
+
+  .role-badge-head {
+    @apply bg-purple-100 text-purple-700;
+  }
+
+  .role-badge-instructor {
+    @apply bg-emerald-100 text-emerald-700;
+  }
+
+  .role-badge-student {
+    @apply bg-sky-100 text-sky-700;
+  }
+
+  /* Hero section gradient background */
+  .hero-gradient {
+    background: var(--gradient-hero);
+  }
+
+  /* Smooth page transitions */
+  .page-transition {
+    @apply animate-in fade-in slide-in-from-bottom-4 duration-500;
+  }
+
+  /* Table row hover */
+  .table-row-hover {
+    @apply transition-colors hover:bg-muted/50;
+  }
+}
+
+@layer utilities {
+  /* Custom animations */
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+
+  .animate-pulse-slow {
+    animation: pulse 3s ease-in-out infinite;
+  }
+
+  /* Scrollbar styling */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--border)) transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--border));
+    border-radius: 3px;
+  }
+}
