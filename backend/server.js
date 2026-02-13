@@ -7,16 +7,6 @@ dotenv.config();
 const PORT = process.env.PORT || 3000;
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
-// Health check endpoint
-app.get('/', (req, res) => {
-  res.status(200).json({ 
-    success: true, 
-    message: 'Server is running',
-    environment: NODE_ENV,
-    timestamp: new Date().toISOString()
-  });
-});
-
 // Test database connection
 pool.query('SELECT NOW()', (err) => {
   if (err) {

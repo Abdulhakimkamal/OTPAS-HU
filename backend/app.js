@@ -63,6 +63,20 @@ app.use((req, res, next) => {
 // Serve uploaded files statically
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+// Health Check Routes
+app.get('/', (req, res) => {
+  res.status(200).json({ 
+    success: true, 
+    message: 'Server is running',
+    environment: process.env.NODE_ENV || 'development',
+    timestamp: new Date().toISOString()
+  });
+});
+
+app.get('/api/health', (req, res) => {
+  res.status(200).json({ success: true, message: 'Server is running' });
+});
+
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/student', studentRoutes);
@@ -72,11 +86,6 @@ app.use('/api/super-admin', superAdminRoutes);
 app.use('/api/department-head', departmentHeadRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/tutorial-files', tutorialFilesRoutes);
-
-// Health Check
-app.get('/api/health', (req, res) => {
-  res.status(200).json({ success: true, message: 'Server is running' });
-});
 
 // Error Handling
 app.use(notFoundHandler);
