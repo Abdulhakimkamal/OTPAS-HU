@@ -20,17 +20,18 @@ app.get('/', (req, res) => {
 // Test database connection
 pool.query('SELECT NOW()', (err) => {
   if (err) {
-    console.error('⚠️ Database connection error:', err.message);
+    console.error('[WARNING] Database connection error:', err.message);
     console.error('Server will continue running without database');
   } else {
-    console.log('✅ Database connected successfully');
+    console.log('[SUCCESS] Database connected successfully');
   }
 });
 
 // Start server
 const server = app.listen(PORT, '0.0.0.0', () => {
-  console.log(✅ Server running on port ${PORT});
-  console.log(📍 Environment: ${NODE_ENV});
+  console.log(`[SUCCESS] Server running on port ${PORT}`);
+  console.log(`[INFO] Environment: ${NODE_ENV}`);
+  console.log(`[INFO] URL: http://localhost:${PORT}`);
 });
 
 // Graceful shutdown
