@@ -12,12 +12,12 @@ export default defineConfig(({ mode }) => ({
     },
     proxy: {
       '/api': {
-        target: 'http://localhost:5001',
+        target: mode === 'production' ? 'https://otpas-hu-backend.onrender.com' : 'http://localhost:3000',
         changeOrigin: true,
         secure: false,
       },
       '/uploads': {
-        target: 'http://localhost:5001',
+        target: mode === 'production' ? 'https://otpas-hu-backend.onrender.com' : 'http://localhost:3000',
         changeOrigin: true,
         secure: false,
       },
@@ -28,5 +28,10 @@ export default defineConfig(({ mode }) => ({
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
+  },
+  build: {
+    outDir: 'dist',
+    sourcemap: false,
+    minify: 'terser',
   },
 }));
