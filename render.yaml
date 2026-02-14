@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: otpas-hu
+    name: otpas-hu-frontend
     env: node
     plan: free
     buildCommand: npm install && VITE_API_URL=https://otpas-hu-database.onrender.com npm run build
