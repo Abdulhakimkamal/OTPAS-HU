@@ -5,7 +5,7 @@
 
 import api from './api';
 
-const API_BASE_URL = '/admin';
+const API_BASE_URL = '/api/admin';
 
 // Types
 export interface DashboardStats {

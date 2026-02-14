@@ -1,6 +1,6 @@
 import api from './api';
 
-const BASE_URL = '/instructor';
+const BASE_URL = '/api/instructor';
 
 // ============================================
 // STUDENT MANAGEMENT (READ ONLY)
