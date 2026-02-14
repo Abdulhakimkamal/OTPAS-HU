@@ -43,9 +43,12 @@ const corsOptions = {
     
     // Add from environment variable
     const corsOrigin = process.env.CORS_ORIGIN;
-    if (corsOrigin && corsOrigin !== 'http://localhost:8080') {
+    if (corsOrigin) {
       corsOrigin.split(',').forEach(o => {
-        allowedOrigins.push(o.trim());
+        const trimmed = o.trim();
+        if (trimmed && !allowedOrigins.includes(trimmed)) {
+          allowedOrigins.push(trimmed);
+        }
       });
     }
     
@@ -54,10 +57,13 @@ const corsOptions = {
     
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin || allowedOrigins.includes(origin)) {
+      console.log('[CORS] Origin allowed');
       callback(null, true);
     } else {
       console.log('[CORS] Origin not allowed:', origin);
-      callback(new Error('Not allowed by CORS'));
+      // Don't reject - allow the request but without CORS headers
+      // This lets the browser handle the CORS error
+      callback(null, false);
     }
   },
   credentials: true,

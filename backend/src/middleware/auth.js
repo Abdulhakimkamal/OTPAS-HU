@@ -2,6 +2,11 @@ import jwt from 'jsonwebtoken';
 import { HTTP_STATUS, ERROR_MESSAGES } from '../config/constants.js';
 
 export const verifyToken = (req, res, next) => {
+  // Skip authentication for OPTIONS requests (CORS preflight)
+  if (req.method === 'OPTIONS') {
+    return next();
+  }
+
   try {
     const token = req.headers.authorization?.split(' ')[1];
 
