@@ -58,10 +58,38 @@ const getCorsOrigins = () => {
 };
 
 app.use(cors({
-  origin: getCorsOrigins(),
+  origin: function(origin, callback) {
+    const allowedOrigins = [
+      'http://localhost:8080',
+      'http://localhost:8081',
+      'http://127.0.0.1:8080',
+      'http://127.0.0.1:8081',
+      'https://otpas-hu.netlify.app',
+      'https://otpas-hu-frontend.onrender.com',
+    ];
+    
+    // Add from environment variable
+    const corsOrigin = process.env.CORS_ORIGIN;
+    if (corsOrigin && corsOrigin !== 'http://localhost:8080') {
+      corsOrigin.split(',').forEach(o => {
+        allowedOrigins.push(o.trim());
+      });
+    }
+    
+    console.log('[CORS] Request origin:', origin);
+    console.log('[CORS] Allowed origins:', allowedOrigins);
+    
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization'],
+  optionsSuccessStatus: 200
 }));
 
 // Rate Limiting
