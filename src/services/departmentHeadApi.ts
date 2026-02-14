@@ -129,10 +129,10 @@ export const createEvaluation = async (data: {
 
 export const getReports = async () => {
   try {
-    console.log('getReports: Making API call to /api/department-head/evaluation-analytics');
+    console.log('getReports: Making API call to /api/department-head/dashboard');
     console.log('getReports: Auth token:', localStorage.getItem('authToken')?.substring(0, 20) + '...');
     
-    const response = await api.get('/api/department-head/evaluation-analytics');
+    const response = await api.get('/api/department-head/dashboard');
     console.log('getReports: Raw response received:', response);
     console.log('getReports: Response type:', typeof response);
     console.log('getReports: Response keys:', response ? Object.keys(response) : 'null/undefined');

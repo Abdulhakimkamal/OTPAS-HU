@@ -48,10 +48,35 @@ export default function DepartmentHeadDashboard() {
       console.log('Dashboard response:', response);
       
       // Handle both response formats: { success, data } and { success, reports }
-      const statsData = response?.data || response?.reports || response;
+      const rawData = response?.data || response?.reports || response;
       
-      if (response && response.success && statsData) {
-        setStats(statsData);
+      if (response && response.success && rawData) {
+        // Transform the API response to match the expected dashboard structure
+        const transformedStats: DashboardStats = {
+          departmentStats: {
+            total_students: rawData.statistics?.total_students || 0,
+            total_instructors: rawData.statistics?.total_instructors || 0,
+            active_users: rawData.statistics?.total_students || 0,
+          },
+          courseStats: {
+            total_courses: 0,
+            active_courses: 0,
+            total_enrollments: 0,
+          },
+          projectStats: {
+            total_projects: rawData.statistics?.total_projects || 0,
+            submitted_projects: rawData.projects_by_status?.find((p: any) => p.status === 'pending')?.count || 0,
+            approved_projects: rawData.projects_by_status?.find((p: any) => p.status === 'approved')?.count || 0,
+            rejected_projects: rawData.projects_by_status?.find((p: any) => p.status === 'rejected')?.count || 0,
+          },
+          performanceStats: {
+            avg_department_score: rawData.statistics?.average_score || 0,
+            avg_completed_projects: 0,
+            avg_courses_completed: 0,
+          },
+        };
+        
+        setStats(transformedStats);
       } else {
         const errorMsg = response?.message || 'Failed to load data - no success flag';
         setError(errorMsg);
