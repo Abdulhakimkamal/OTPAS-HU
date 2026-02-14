@@ -83,9 +83,9 @@ export default function ManageStudentsPage() {
   useEffect(() => {
     // Filter students based on search term
     const filtered = students.filter(student =>
-      student.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.username.toLowerCase().includes(searchTerm.toLowerCase())
+      (student.full_name?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+      (student.email?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+      (student.username?.toLowerCase() || '').includes(searchTerm.toLowerCase())
     );
     setFilteredStudents(filtered);
     setCurrentPage(1); // Reset to first page on search
