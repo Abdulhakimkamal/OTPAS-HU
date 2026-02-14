@@ -8,6 +8,7 @@ import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { getApiUrl } from '@/utils/api';
 import { 
   Settings, 
   Bell, 
@@ -75,9 +76,7 @@ export default function InstructorSettings() {
         bio: `Department: ${profileData.department}` // Store department in bio field
       };
 
-      const backendUrl = process.env.NODE_ENV === 'production' 
-        ? 'https://otpas-hu-database.onrender.com'
-        : 'http://localhost:3000';
+      const backendUrl = getApiUrl('');
 
       const response = await fetch(`${backendUrl}/api/instructor/profile`, {
         method: 'PUT',
@@ -135,9 +134,7 @@ export default function InstructorSettings() {
         return;
       }
 
-      const backendUrl = process.env.NODE_ENV === 'production' 
-        ? 'https://otpas-hu-database.onrender.com'
-        : 'http://localhost:3000';
+      const backendUrl = getApiUrl('');
 
       const response = await fetch(`${backendUrl}/api/instructor/settings/notifications`, {
         method: 'PUT',
@@ -217,9 +214,7 @@ export default function InstructorSettings() {
 
       console.log('📤 Sending password change request...');
 
-      const backendUrl = process.env.NODE_ENV === 'production' 
-        ? 'https://otpas-hu-database.onrender.com'
-        : 'http://localhost:3000';
+      const backendUrl = getApiUrl('');
 
       const response = await fetch(`${backendUrl}/api/instructor/change-password`, {
         method: 'PUT',

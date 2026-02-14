@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from './useAuth';
+import { getApiUrl } from '@/utils/api';
 
 export interface Department {
   id: string;
@@ -38,7 +39,7 @@ export function useDepartments(): UseDepartmentsReturn {
       setLoading(true);
       setError(null);
 
-      const response = await fetch('http://127.0.0.1:5000/api/admin/departments', {
+      const response = await fetch(getApiUrl('/api/admin/departments'), {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
@@ -68,7 +69,7 @@ export function useDepartments(): UseDepartmentsReturn {
       throw new Error('Not authenticated');
     }
 
-    const response = await fetch('http://127.0.0.1:5000/api/admin/departments', {
+    const response = await fetch(getApiUrl('/api/admin/departments'), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -92,7 +93,7 @@ export function useDepartments(): UseDepartmentsReturn {
       throw new Error('Not authenticated');
     }
 
-    const response = await fetch(`http://127.0.0.1:5000/api/admin/departments/${deptId}`, {
+    const response = await fetch(getApiUrl(`/api/admin/departments/${deptId}`), {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -115,7 +116,7 @@ export function useDepartments(): UseDepartmentsReturn {
       throw new Error('Not authenticated');
     }
 
-    const response = await fetch(`http://127.0.0.1:5000/api/admin/departments/${deptId}`, {
+    const response = await fetch(getApiUrl(`/api/admin/departments/${deptId}`), {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
