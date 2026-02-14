@@ -6,7 +6,7 @@ const getApiBaseUrl = (): string => {
   // Check if we're in production (Netlify)
   if (typeof window !== 'undefined') {
     const hostname = window.location.hostname;
-    if (hostname.includes('netlify.app') || hostname.includes('render.com')) {
+    if (hostname.includes('netlify.app')) {
       return 'https://otpas-hu-database.onrender.com';
     }
   }
@@ -14,20 +14,19 @@ const getApiBaseUrl = (): string => {
 };
 
 // Store the original fetch
-const originalFetch = window.fetch;
+const originalFetch = globalThis.fetch;
 
 // Override global fetch
 export const setupFetchInterceptor = () => {
-  window.fetch = function(...args: any[]) {
-    let [resource, config] = args;
-
+  globalThis.fetch = ((resource: any, config?: any) => {
     // If resource is a string and starts with /, prepend the API base URL
     if (typeof resource === 'string' && resource.startsWith('/')) {
       const baseUrl = getApiBaseUrl();
       resource = `${baseUrl}${resource}`;
+      console.log('[API] Routing to:', resource);
     }
 
     // Call original fetch with modified resource
-    return originalFetch.call(this, resource, config);
-  } as any;
+    return originalFetch(resource, config);
+  }) as any;
 };
