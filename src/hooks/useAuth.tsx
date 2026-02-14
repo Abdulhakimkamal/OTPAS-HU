@@ -77,7 +77,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       setLoading(true);
       
-      const response = await fetch('/api/auth/super-admin/login', {
+      const backendUrl = process.env.NODE_ENV === 'production' 
+        ? 'https://otpas-hu-database.onrender.com'
+        : 'http://localhost:3000';
+      
+      const response = await fetch(`${backendUrl}/api/auth/super-admin/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -123,7 +127,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       setLoading(true);
       
-      const response = await fetch('/api/auth/login', {
+      const backendUrl = process.env.NODE_ENV === 'production' 
+        ? 'https://otpas-hu-database.onrender.com'
+        : 'http://localhost:3000';
+      
+      const response = await fetch(`${backendUrl}/api/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -176,7 +184,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       const userRole = selectedRole || 'student';
 
-      const response = await fetch('/api/auth/register', {
+      const backendUrl = process.env.NODE_ENV === 'production' 
+        ? 'https://otpas-hu-database.onrender.com'
+        : 'http://localhost:3000';
+
+      const response = await fetch(`${backendUrl}/api/auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
