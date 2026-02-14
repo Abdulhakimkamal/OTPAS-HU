@@ -98,9 +98,11 @@ export default function ManageStudentsPage() {
       const response: any = await getStudents();
       console.log('ManageStudents: Response:', response);
       if (response && response.success) {
-        console.log('ManageStudents: Students loaded:', response.students?.length);
-        setStudents(response.students || []);
-        setFilteredStudents(response.students || []);
+        // API returns { success: true, data: [...], count: number }
+        const studentsList = response.data || response.students || [];
+        console.log('ManageStudents: Students loaded:', studentsList.length);
+        setStudents(studentsList);
+        setFilteredStudents(studentsList);
       } else {
         console.error('ManageStudents: Failed to load students', response);
         toast.error('Failed to load students');
