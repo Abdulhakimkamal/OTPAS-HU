@@ -4,7 +4,7 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || process.env.RENDER_EXTERNAL_PORT || 10000;
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
 // Test database connection
