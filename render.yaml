@@ -1,5 +1,14 @@
 services:
   - type: web
+    name: otpas-hu-frontend
+    env: node
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: VITE_API_URL
+        value: https://otpas-hu-database.onrender.com
+  - type: web
     name: otpas-hu-backend
     env: node
     plan: free
@@ -32,7 +41,7 @@ services:
       - key: JWT_SECRET
         generateValue: true
       - key: CORS_ORIGIN
-        value: https://otpas-hu.netlify.app
+        value: https://otpas-hu-frontend.onrender.com
 
 databases:
   - name: otpas-hu-db
