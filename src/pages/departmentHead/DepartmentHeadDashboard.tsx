@@ -47,16 +47,16 @@ export default function DepartmentHeadDashboard() {
       const response: any = await getReports();
       console.log('Dashboard response:', response);
       
-      // Handle both response formats: { success, data } and { success, reports }
-      const rawData = response?.data || response?.reports || response;
+      // The API returns { success: true, data: { statistics: {...}, evaluations_by_type: [...], ... } }
+      const apiData = response?.data;
       
-      if (response && response.success && rawData) {
+      if (response && response.success && apiData) {
         // Transform the API response to match the expected dashboard structure
         const transformedStats: DashboardStats = {
           departmentStats: {
-            total_students: rawData.statistics?.total_students || 0,
-            total_instructors: rawData.statistics?.total_instructors || 0,
-            active_users: rawData.statistics?.total_students || 0,
+            total_students: apiData.statistics?.total_students || 0,
+            total_instructors: apiData.statistics?.total_instructors || 0,
+            active_users: apiData.statistics?.total_students || 0,
           },
           courseStats: {
             total_courses: 0,
@@ -64,13 +64,13 @@ export default function DepartmentHeadDashboard() {
             total_enrollments: 0,
           },
           projectStats: {
-            total_projects: rawData.statistics?.total_projects || 0,
-            submitted_projects: rawData.projects_by_status?.find((p: any) => p.status === 'pending')?.count || 0,
-            approved_projects: rawData.projects_by_status?.find((p: any) => p.status === 'approved')?.count || 0,
-            rejected_projects: rawData.projects_by_status?.find((p: any) => p.status === 'rejected')?.count || 0,
+            total_projects: apiData.statistics?.total_projects || 0,
+            submitted_projects: apiData.projects_by_status?.find((p: any) => p.status === 'draft')?.count || 0,
+            approved_projects: apiData.projects_by_status?.find((p: any) => p.status === 'approved')?.count || 0,
+            rejected_projects: apiData.projects_by_status?.find((p: any) => p.status === 'rejected')?.count || 0,
           },
           performanceStats: {
-            avg_department_score: rawData.statistics?.average_score || 0,
+            avg_department_score: apiData.statistics?.average_score || 0,
             avg_completed_projects: 0,
             avg_courses_completed: 0,
           },

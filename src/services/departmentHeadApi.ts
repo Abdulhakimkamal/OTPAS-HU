@@ -201,7 +201,7 @@ export const createFeedback = async (data: {
 // ============================================
 
 export const getProfile = async () => {
-  return await api.get('/auth/profile');
+  return await api.get('/api/auth/profile');
 };
 
 export const updateProfile = async (data: {
@@ -210,7 +210,7 @@ export const updateProfile = async (data: {
   bio?: string;
   profile_picture?: string;
 }) => {
-  return await api.put('/auth/profile', data);
+  return await api.put('/api/auth/profile', data);
 };
 
 // ============================================
@@ -221,7 +221,7 @@ export const changePassword = async (data: {
   currentPassword: string;
   newPassword: string;
 }) => {
-  return await api.put('/auth/change-password', data);
+  return await api.put('/api/auth/change-password', data);
 };
 
 
