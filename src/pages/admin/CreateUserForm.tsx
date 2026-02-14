@@ -64,7 +64,7 @@ export default function CreateUserForm() {
     setLoadingDepartments(true);
     setGeneralError('');
     try {
-      const response = await api.get<{ success: boolean; departments: Department[] }>('/admin/departments');
+      const response = await api.get<{ success: boolean; departments: Department[] }>('/api/admin/departments');
       console.log('Departments response:', response);
       if (response.success && response.departments) {
         setDepartments(response.departments);

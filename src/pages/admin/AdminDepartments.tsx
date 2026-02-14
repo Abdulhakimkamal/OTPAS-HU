@@ -66,7 +66,7 @@ export default function AdminDepartments() {
   const fetchDepartments = async () => {
     setFetchLoading(true);
     try {
-      const response = await api.get<{ success: boolean; departments: Department[] }>('/admin/departments');
+      const response = await api.get<{ success: boolean; departments: Department[] }>('/api/admin/departments');
       
       if (response.success && response.departments) {
         // Transform backend data to display format
@@ -151,7 +151,7 @@ export default function AdminDepartments() {
     setLoading(true);
     try {
       const response = await api.post<{ success: boolean; message: string; department: Department }>(
-        '/admin/departments',
+        '/api/admin/departments',
         {
           name: formData.name.trim(),
           code: formData.code.trim(),
@@ -207,7 +207,7 @@ export default function AdminDepartments() {
     }
 
     try {
-      const response = await api.delete<{ success: boolean; message: string }>(`/admin/departments/${dept.id}`);
+      const response = await api.delete<{ success: boolean; message: string }>(`/api/admin/departments/${dept.id}`);
       
       if (response.success) {
         toast.success('Department deleted successfully');

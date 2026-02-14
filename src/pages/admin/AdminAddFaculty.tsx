@@ -50,7 +50,7 @@ export default function AdminAddFaculty() {
   const fetchDepartments = async () => {
     setLoadingDepartments(true);
     try {
-      const response = await api.get<{ success: boolean; departments: Department[] }>('/admin/departments');
+      const response = await api.get<{ success: boolean; departments: Department[] }>('/api/admin/departments');
       if (response.success && response.departments) {
         setDepartments(response.departments);
       }
