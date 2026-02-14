@@ -813,14 +813,27 @@ export const getMyCourses = async (req, res) => {
 
     const query = `
       SELECT 
-        c.*,
+        c.id,
+        c.title,
+        c.code,
+        c.description,
+        c.department_id,
+        c.instructor_id,
+        c.credits,
+        c.semester,
+        c.academic_year,
+        c.max_students,
+        c.enrolled_count,
+        c.is_active,
+        c.created_at,
+        c.updated_at,
         d.name as department_name,
         COUNT(DISTINCT e.student_id) as enrolled_students
       FROM courses c
       LEFT JOIN departments d ON d.id = c.department_id
       LEFT JOIN enrollments e ON e.course_id = c.id
       WHERE c.instructor_id = $1
-      GROUP BY c.id, d.name
+      GROUP BY c.id, c.title, c.code, c.description, c.department_id, c.instructor_id, c.credits, c.semester, c.academic_year, c.max_students, c.enrolled_count, c.is_active, c.created_at, c.updated_at, d.name
       ORDER BY c.semester DESC, c.title
     `;
 
