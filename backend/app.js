@@ -25,8 +25,11 @@ const app = express();
 
 // Security Middleware
 app.use(helmet());
-app.use(cors({
-  origin: [
+
+// Configure CORS based on environment
+const getCorsOrigins = () => {
+  const corsOrigin = process.env.CORS_ORIGIN || 'http://localhost:8080';
+  const origins = [
     'http://localhost:8080',
     'http://localhost:8081',
     'http://127.0.0.1:8080',
@@ -34,7 +37,20 @@ app.use(cors({
     /^http:\/\/192\.168\.\d+\.\d+:808[01]$/,
     /^http:\/\/10\.\d+\.\d+\.\d+:808[01]$/,
     /^http:\/\/172\.\d+\.\d+\.\d+:808[01]$/
-  ],
+  ];
+  
+  // Add production origins from environment variable
+  if (corsOrigin && corsOrigin !== 'http://localhost:8080') {
+    corsOrigin.split(',').forEach(origin => {
+      origins.push(origin.trim());
+    });
+  }
+  
+  return origins;
+};
+
+app.use(cors({
+  origin: getCorsOrigins(),
   credentials: true,
 }));
 
