@@ -23,6 +23,9 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
+// Trust proxy for Render
+app.set('trust proxy', 1);
+
 // Security Middleware
 app.use(helmet());
 
