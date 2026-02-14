@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from './useAuth';
+import { getApiUrl } from '@/utils/api';
 
 export interface User {
   id: string;
@@ -38,11 +39,7 @@ export function useUsers(): UseUsersReturn {
       setLoading(true);
       setError(null);
 
-      const backendUrl = process.env.NODE_ENV === 'production' 
-        ? 'https://otpas-hu-database.onrender.com'
-        : 'http://localhost:3000';
-
-      const response = await fetch(`${backendUrl}/api/admin/users`, {
+      const response = await fetch(getApiUrl('/api/admin/users'), {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
@@ -82,11 +79,7 @@ export function useUsers(): UseUsersReturn {
       throw new Error('Not authenticated');
     }
 
-    const backendUrl = process.env.NODE_ENV === 'production' 
-      ? 'https://otpas-hu-database.onrender.com'
-      : 'http://localhost:3000';
-
-    const response = await fetch(`${backendUrl}/api/admin/users`, {
+    const response = await fetch(getApiUrl('/api/admin/users'), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -120,11 +113,7 @@ export function useUsers(): UseUsersReturn {
       throw new Error('Not authenticated');
     }
 
-    const backendUrl = process.env.NODE_ENV === 'production' 
-      ? 'https://otpas-hu-database.onrender.com'
-      : 'http://localhost:3000';
-
-    const response = await fetch(`${backendUrl}/api/admin/users/${userId}`, {
+    const response = await fetch(getApiUrl(`/api/admin/users/${userId}`), {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -147,11 +136,7 @@ export function useUsers(): UseUsersReturn {
       throw new Error('Not authenticated');
     }
 
-    const backendUrl = process.env.NODE_ENV === 'production' 
-      ? 'https://otpas-hu-database.onrender.com'
-      : 'http://localhost:3000';
-
-    const response = await fetch(`${backendUrl}/api/admin/users/${userId}`, {
+    const response = await fetch(getApiUrl(`/api/admin/users/${userId}`), {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',

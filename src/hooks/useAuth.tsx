@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, ReactNode } from 'react';
+import { getApiUrl } from '@/utils/api';
 
 export type AppRole = 'admin' | 'department_head' | 'instructor' | 'student' | 'super_admin';
 
@@ -77,11 +78,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       setLoading(true);
       
-      const backendUrl = process.env.NODE_ENV === 'production' 
-        ? 'https://otpas-hu-database.onrender.com'
-        : 'http://localhost:3000';
-      
-      const response = await fetch(`${backendUrl}/api/auth/super-admin/login`, {
+      const response = await fetch(getApiUrl('/api/auth/super-admin/login'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -127,11 +124,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       setLoading(true);
       
-      const backendUrl = process.env.NODE_ENV === 'production' 
-        ? 'https://otpas-hu-database.onrender.com'
-        : 'http://localhost:3000';
-      
-      const response = await fetch(`${backendUrl}/api/auth/login`, {
+      const response = await fetch(getApiUrl('/api/auth/login'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -184,11 +177,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       const userRole = selectedRole || 'student';
 
-      const backendUrl = process.env.NODE_ENV === 'production' 
-        ? 'https://otpas-hu-database.onrender.com'
-        : 'http://localhost:3000';
-
-      const response = await fetch(`${backendUrl}/api/auth/register`, {
+      const response = await fetch(getApiUrl('/api/auth/register'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
