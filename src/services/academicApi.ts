@@ -63,23 +63,23 @@ export interface EvaluationSummary {
 export const instructorApi = {
   // Project title management
   requestTitleSubmission: (studentIds: number[]) =>
-    api.post<void>('/instructor/project/request-title', { student_ids: studentIds }),
+    api.post<void>('/api/instructor/project/request-title', { student_ids: studentIds }),
 
   getPendingProjects: async () => {
-    const response = await api.get<{ success: boolean; data: { projects: Project[]; count: number } }>('/instructor/projects/pending');
+    const response = await api.get<{ success: boolean; data: { projects: Project[]; count: number } }>('/api/instructor/projects/pending');
     return response.data?.projects || [];
   },
 
   getAllProjects: async () => {
-    const response = await api.get<{ success: boolean; data: { projects: Project[]; count: number } }>('/instructor/projects');
+    const response = await api.get<{ success: boolean; data: { projects: Project[]; count: number } }>('/api/instructor/projects');
     return response.data?.projects || [];
   },
 
   approveTitle: (projectId: number) =>
-    api.patch<Project>(`/instructor/project/${projectId}/approve`, {}),
+    api.patch<Project>(`/api/instructor/project/${projectId}/approve`, {}),
 
   disapproveTitle: (projectId: number) =>
-    api.patch<Project>(`/instructor/project/${projectId}/disapprove`, {}),
+    api.patch<Project>(`/api/instructor/project/${projectId}/disapprove`, {}),
 
   // Evaluation management
   createEvaluation: (data: {
@@ -90,7 +90,7 @@ export const instructorApi = {
     recommendation: string;
     status: string;
   }) =>
-    api.post<Evaluation>('/instructor/evaluation/create', data),
+    api.post<Evaluation>('/api/instructor/evaluation/create', data),
 };
 
 // Student API
