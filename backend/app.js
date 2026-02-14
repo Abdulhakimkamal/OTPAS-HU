@@ -56,6 +56,8 @@ const getCorsOrigins = () => {
 app.use(cors({
   origin: getCorsOrigins(),
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
 // Rate Limiting
