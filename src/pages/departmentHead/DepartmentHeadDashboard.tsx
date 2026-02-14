@@ -47,8 +47,11 @@ export default function DepartmentHeadDashboard() {
       const response: any = await getReports();
       console.log('Dashboard response:', response);
       
-      if (response && response.success) {
-        setStats(response.reports);
+      // Handle both response formats: { success, data } and { success, reports }
+      const statsData = response?.data || response?.reports || response;
+      
+      if (response && response.success && statsData) {
+        setStats(statsData);
       } else {
         const errorMsg = response?.message || 'Failed to load data - no success flag';
         setError(errorMsg);
