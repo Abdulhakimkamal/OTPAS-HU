@@ -37,6 +37,7 @@ const getCorsOrigins = () => {
     'http://localhost:8081',
     'http://127.0.0.1:8080',
     'http://127.0.0.1:8081',
+    'https://otpas-hu.netlify.app',
     /^http:\/\/192\.168\.\d+\.\d+:808[01]$/,
     /^http:\/\/10\.\d+\.\d+\.\d+:808[01]$/,
     /^http:\/\/172\.\d+\.\d+\.\d+:808[01]$/
