@@ -1,11 +1,15 @@
 import app from './app.js';
 import pool from './src/config/database.js';
+import { initializeDatabase } from './src/config/initDatabase.js';
 import dotenv from 'dotenv';
 
 dotenv.config();
 
 const PORT = process.env.PORT || process.env.RENDER_EXTERNAL_PORT || 10000;
 const NODE_ENV = process.env.NODE_ENV || 'development';
+
+// Initialize database on startup
+await initializeDatabase();
 
 // Test database connection
 pool.query('SELECT NOW()', (err) => {
