@@ -233,8 +233,9 @@ export const verifyDepartmentHeadAccess = async (req, res, next) => {
 
     // Get department head's department
     const query = `
-      SELECT department_id FROM users
-      WHERE id = $1 AND role = 'department_head'
+      SELECT u.department_id FROM users u
+      JOIN roles r ON u.role_id = r.id
+      WHERE u.id = $1 AND r.name = 'department_head'
       LIMIT 1
     `;
 
