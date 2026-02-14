@@ -135,7 +135,7 @@ class AdvisorAssignmentService {
           u.email,
           u.username,
           d.name as department_name,
-          COUNT(DISTINCT p.id) as advised_projects_count
+          COALESCE(COUNT(DISTINCT p.id), 0) as advised_projects_count
         FROM users u
         JOIN roles r ON u.role_id = r.id
         LEFT JOIN departments d ON u.department_id = d.id
@@ -150,7 +150,8 @@ class AdvisorAssignmentService {
       const result = await pool.query(query, [departmentId]);
       return result.rows;
     } catch (error) {
-      throw error;
+      console.error('Error in getAvailableInstructors:', error.message);
+      return [];
     }
   }
 
@@ -187,23 +188,24 @@ class AdvisorAssignmentService {
           u.email as student_email,
           p.instructor_id,
           i.full_name as instructor_name,
-          COUNT(DISTINCT e.id) as evaluation_count
+          COALESCE(COUNT(DISTINCT e.id), 0) as evaluation_count
         FROM projects p
         JOIN users u ON p.student_id = u.id
         LEFT JOIN users i ON p.instructor_id = i.id
         LEFT JOIN evaluations e ON p.id = e.project_id
         WHERE p.advisor_id IS NULL
           AND u.department_id = $1
-          AND p.status IN ('approved', 'submitted', 'under_review')
+          AND p.status IN ('draft', 'submitted', 'approved')
         GROUP BY p.id, p.title, p.description, p.status, p.submitted_at, p.approved_at,
                  p.student_id, u.full_name, u.email, p.instructor_id, i.full_name
-        ORDER BY p.submitted_at DESC
+        ORDER BY p.submitted_at DESC NULLS LAST
       `;
 
       const result = await pool.query(query, [departmentId]);
       return result.rows;
     } catch (error) {
-      throw error;
+      console.error('Error in getUnassignedProjects:', error.message);
+      return [];
     }
   }
 
@@ -245,7 +247,7 @@ class AdvisorAssignmentService {
           p.assigned_by,
           ab.full_name as assigned_by_name,
           p.assigned_at,
-          COUNT(DISTINCT e.id) as evaluation_count
+          COALESCE(COUNT(DISTINCT e.id), 0) as evaluation_count
         FROM projects p
         JOIN users u ON p.student_id = u.id
         LEFT JOIN users i ON p.instructor_id = i.id
@@ -256,13 +258,14 @@ class AdvisorAssignmentService {
         GROUP BY p.id, p.title, p.description, p.status, p.submitted_at, p.approved_at,
                  p.student_id, u.full_name, u.email, p.instructor_id, i.full_name,
                  p.advisor_id, a.full_name, p.assigned_by, ab.full_name, p.assigned_at
-        ORDER BY p.submitted_at DESC
+        ORDER BY p.submitted_at DESC NULLS LAST
       `;
 
       const result = await pool.query(query, [departmentId]);
       return result.rows;
     } catch (error) {
-      throw error;
+      console.error('Error in getProjectsWithAdvisors:', error.message);
+      return [];
     }
   }
 
