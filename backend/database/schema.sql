@@ -150,11 +150,16 @@ CREATE TABLE IF NOT EXISTS projects (
   description TEXT,
   course_id INTEGER NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
   student_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  instructor_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+  advisor_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+  assigned_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
+  assigned_at TIMESTAMP,
   file_url VARCHAR(500),
   status project_status DEFAULT 'draft',
   feedback TEXT,
   submitted_at TIMESTAMP,
   approved_at TIMESTAMP,
+  rejected_at TIMESTAMP,
   rejected_reason TEXT,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -273,6 +278,22 @@ CREATE TABLE IF NOT EXISTS reports (
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Messages Table
+CREATE TABLE IF NOT EXISTS messages (
+  id SERIAL PRIMARY KEY,
+  sender_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  receiver_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  subject VARCHAR(255),
+  message_text TEXT NOT NULL,
+  parent_message_id INTEGER REFERENCES messages(id) ON DELETE CASCADE,
+  is_read BOOLEAN DEFAULT FALSE,
+  read_at TIMESTAMP,
+  is_deleted_by_sender BOOLEAN DEFAULT FALSE,
+  is_deleted_by_receiver BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Notifications Table
 CREATE TABLE IF NOT EXISTS notifications (
   id SERIAL PRIMARY KEY,
@@ -375,6 +396,13 @@ CREATE INDEX IF NOT EXISTS idx_reports_created_at ON reports(created_at);
 CREATE INDEX IF NOT EXISTS idx_notifications_user_id ON notifications(user_id);
 CREATE INDEX IF NOT EXISTS idx_notifications_is_read ON notifications(is_read);
 CREATE INDEX IF NOT EXISTS idx_notifications_created_at ON notifications(created_at);
+
+-- Messages Indexes
+CREATE INDEX IF NOT EXISTS idx_messages_sender_id ON messages(sender_id);
+CREATE INDEX IF NOT EXISTS idx_messages_receiver_id ON messages(receiver_id);
+CREATE INDEX IF NOT EXISTS idx_messages_is_read ON messages(is_read);
+CREATE INDEX IF NOT EXISTS idx_messages_created_at ON messages(created_at);
+CREATE INDEX IF NOT EXISTS idx_messages_sender_receiver ON messages(sender_id, receiver_id);
 
 -- ============================================
 -- COMPOSITE INDEXES FOR COMMON QUERIES

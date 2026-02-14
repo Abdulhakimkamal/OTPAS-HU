@@ -124,6 +124,8 @@ router.get('/activity/recent', verifyDepartmentHeadAccess, DepartmentHeadControl
 // ============================================
 // RECOMMENDATION ENGINE
 // ============================================
+router.get('/recommend/risk-students', verifyDepartmentHeadAccess, DepartmentHeadController.getRiskStudents);
+
 // Recommendation endpoints deprecated - use analytics endpoints above
 
 // ============================================

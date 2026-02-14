@@ -210,6 +210,30 @@ class DepartmentHeadController {
   }
 
   /**
+   * Get at-risk students
+   * GET /api/department-head/recommend/risk-students
+   * @param {Object} req - Express request object
+   * @param {Object} res - Express response object
+   * @param {Function} next - Express next middleware function
+   */
+  static async getRiskStudents(req, res, next) {
+    try {
+      const departmentHeadId = req.user.id;
+
+      const riskStudents = await DepartmentHeadService.getRiskStudents(departmentHeadId);
+
+      res.status(HTTP_STATUS.OK).json({
+        success: true,
+        message: 'At-risk students retrieved successfully',
+        data: riskStudents,
+        count: riskStudents.length
+      });
+    } catch (error) {
+      handleError(error, res, next);
+    }
+  }
+
+  /**
    * Get dashboard summary
    * GET /api/department-head/dashboard
    * @param {Object} req - Express request object

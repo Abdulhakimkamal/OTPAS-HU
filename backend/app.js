@@ -122,6 +122,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/super-admin', superAdminRoutes);
 app.use('/api/department-head', departmentHeadRoutes);
 app.use('/api/messages', messageRoutes);
+app.use('/messages', messageRoutes);
 app.use('/api/tutorial-files', tutorialFilesRoutes);
 
 // Error Handling

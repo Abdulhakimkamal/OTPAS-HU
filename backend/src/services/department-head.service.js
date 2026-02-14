@@ -67,15 +67,11 @@ class DepartmentHeadService {
         p.approved_at,
         p.rejected_at,
         COUNT(DISTINCT e.id) as evaluation_count,
-        AVG(e.score) as average_score,
-        COUNT(DISTINCT pf.id) as file_count,
-        SUM(pf.file_size) as total_file_size,
-        MAX(pf.uploaded_at) as last_file_upload
+        AVG(e.score) as average_score
       FROM projects p
       JOIN users u ON p.student_id = u.id
       LEFT JOIN users i ON p.instructor_id = i.id
       LEFT JOIN evaluations e ON p.id = e.project_id
-      LEFT JOIN project_files pf ON p.id = pf.project_id
       WHERE u.department_id = (SELECT department_id FROM users WHERE id = $1)
       GROUP BY p.id, p.student_id, u.full_name, u.email, i.full_name, i.email,
                p.title, p.description, p.status, p.submitted_at, p.approved_at, p.rejected_at
@@ -204,17 +200,17 @@ class DepartmentHeadService {
           i.id as instructor_id,
           i.full_name as instructor_name,
           i.email as instructor_email,
-          COUNT(DISTINCT p.id) as assigned_students,
+          COUNT(DISTINCT p.id) as assigned_projects,
           COUNT(DISTINCT e.id) as evaluations_completed,
           AVG(e.score) as average_evaluation_score,
           COUNT(CASE WHEN p.status = 'approved' THEN 1 END) as approved_projects,
           COUNT(CASE WHEN p.status = 'rejected' THEN 1 END) as rejected_projects
         FROM users i
-        LEFT JOIN instructor_student_assignments isa ON i.id = isa.instructor_id
-        LEFT JOIN users s ON isa.student_id = s.id
-        LEFT JOIN projects p ON i.id = p.instructor_id AND s.id = p.student_id
+        JOIN roles r ON i.role_id = r.id
+        LEFT JOIN projects p ON i.id = p.instructor_id
         LEFT JOIN evaluations e ON p.id = e.project_id
-        WHERE s.department_id = (SELECT department_id FROM users WHERE id = $1)
+        WHERE r.name = 'instructor'
+          AND i.department_id = (SELECT department_id FROM users WHERE id = $1)
         GROUP BY i.id, i.full_name, i.email
         ORDER BY evaluations_completed DESC
       `;
@@ -240,18 +236,17 @@ class DepartmentHeadService {
         u.full_name as student_name,
         u.email as student_email,
         COUNT(DISTINCT p.id) as total_projects,
-        COUNT(CASE WHEN p.status = 'pending' THEN 1 END) as pending_projects,
+        COUNT(CASE WHEN p.status = 'draft' THEN 1 END) as draft_projects,
+        COUNT(CASE WHEN p.status = 'submitted' THEN 1 END) as submitted_projects,
         COUNT(CASE WHEN p.status = 'approved' THEN 1 END) as approved_projects,
         COUNT(CASE WHEN p.status = 'rejected' THEN 1 END) as rejected_projects,
         COUNT(DISTINCT e.id) as evaluations_received,
-        AVG(e.score) as average_score,
-        COUNT(DISTINCT pf.id) as files_uploaded,
-        SUM(pf.file_size) as total_file_size
+        AVG(e.score) as average_score
       FROM users u
       LEFT JOIN projects p ON u.id = p.student_id
       LEFT JOIN evaluations e ON p.id = e.project_id
-      LEFT JOIN project_files pf ON p.id = pf.project_id
       WHERE u.department_id = (SELECT department_id FROM users WHERE id = $1)
+        AND u.role_id = (SELECT id FROM roles WHERE name = 'student')
       GROUP BY u.id, u.full_name, u.email
       ORDER BY u.full_name
     `;
@@ -320,7 +315,7 @@ class DepartmentHeadService {
    */
   static async getDepartmentId(departmentHeadId) {
     const query = `
-      SELECT department_id FROM users WHERE id = $1 AND role = 'department_head'
+      SELECT department_id FROM users WHERE id = $1
     `;
 
     const result = await pool.query(query, [departmentHeadId]);
@@ -329,6 +324,41 @@ class DepartmentHeadService {
     }
 
     return result.rows[0].department_id;
+  }
+
+  /**
+   * Get at-risk students (students with low average scores)
+   * @param {number} departmentHeadId - Department head ID
+   * @returns {Promise<Array>} List of at-risk students
+   */
+  static async getRiskStudents(departmentHeadId) {
+    try {
+      const query = `
+        SELECT 
+          u.id as student_id,
+          u.full_name as student_name,
+          u.email as student_email,
+          COUNT(DISTINCT p.id) as total_projects,
+          COUNT(DISTINCT e.id) as evaluations_received,
+          AVG(e.score) as average_score,
+          MIN(e.score) as lowest_score,
+          MAX(e.score) as highest_score
+        FROM users u
+        LEFT JOIN projects p ON u.id = p.student_id
+        LEFT JOIN evaluations e ON p.id = e.project_id
+        WHERE u.department_id = (SELECT department_id FROM users WHERE id = $1)
+          AND u.role_id = (SELECT id FROM roles WHERE name = 'student')
+        GROUP BY u.id, u.full_name, u.email
+        HAVING AVG(e.score) < 60 OR (COUNT(DISTINCT e.id) = 0 AND COUNT(DISTINCT p.id) > 0)
+        ORDER BY AVG(e.score) ASC
+      `;
+
+      const result = await pool.query(query, [departmentHeadId]);
+      return result.rows;
+    } catch (error) {
+      console.error('Error in getRiskStudents:', error.message);
+      return [];
+    }
   }
 }
 
