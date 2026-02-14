@@ -3,15 +3,25 @@
  */
 
 const getApiBaseUrl = (): string => {
-  // Check if we're in production (Netlify)
+  // First check environment variable (set by Vite)
+  const envUrl = import.meta.env.VITE_API_URL;
+  if (envUrl) {
+    console.log('[API] Using environment variable URL:', envUrl);
+    return envUrl;
+  }
+
+  // Check if we're in production (Netlify or other)
   if (typeof window !== 'undefined') {
     const hostname = window.location.hostname;
     console.log('[API] Current hostname:', hostname);
-    if (hostname.includes('netlify.app')) {
+    
+    // If not localhost, use production backend
+    if (hostname !== 'localhost' && hostname !== '127.0.0.1') {
       console.log('[API] Using production backend URL');
       return 'https://otpas-hu-database.onrender.com';
     }
   }
+  
   console.log('[API] Using localhost backend URL');
   return 'http://localhost:3000';
 };
@@ -22,6 +32,7 @@ const originalFetch = globalThis.fetch;
 // Override global fetch
 export const setupFetchInterceptor = () => {
   console.log('[API] Setting up fetch interceptor');
+  console.log('[API] Environment VITE_API_URL:', import.meta.env.VITE_API_URL);
   
   globalThis.fetch = ((resource: any, config?: any) => {
     let url = resource;
