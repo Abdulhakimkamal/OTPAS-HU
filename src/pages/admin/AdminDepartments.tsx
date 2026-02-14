@@ -66,6 +66,7 @@ export default function AdminDepartments() {
   const fetchDepartments = async () => {
     setFetchLoading(true);
     try {
+      // Fetch departments from the admin API
       const response = await api.get<{ success: boolean; departments: Department[] }>('/api/admin/departments');
       
       if (response.success && response.departments) {
