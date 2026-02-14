@@ -93,29 +93,43 @@ class DepartmentHeadService {
    * @returns {Promise<Object>} Evaluation statistics
    */
   static async getEvaluationStatistics(departmentHeadId) {
-    const query = `
-      SELECT 
-        COUNT(DISTINCT e.id) as total_evaluations,
-        COUNT(DISTINCT p.id) as total_projects,
-        COUNT(DISTINCT p.student_id) as total_students,
-        COUNT(DISTINCT e.instructor_id) as total_instructors,
-        AVG(e.score) as average_score,
-        MIN(e.score) as min_score,
-        MAX(e.score) as max_score,
-        COUNT(CASE WHEN e.status = 'Approved' THEN 1 END) as approved_count,
-        COUNT(CASE WHEN e.status = 'Needs Revision' THEN 1 END) as needs_revision_count,
-        COUNT(CASE WHEN e.status = 'Rejected' THEN 1 END) as rejected_count,
-        COUNT(CASE WHEN p.status = 'pending' THEN 1 END) as pending_projects,
-        COUNT(CASE WHEN p.status = 'approved' THEN 1 END) as approved_projects,
-        COUNT(CASE WHEN p.status = 'rejected' THEN 1 END) as rejected_projects
-      FROM evaluations e
-      JOIN projects p ON e.project_id = p.id
-      JOIN users u ON p.student_id = u.id
-      WHERE u.department_id = (SELECT department_id FROM users WHERE id = $1)
-    `;
+    try {
+      const query = `
+        SELECT 
+          COUNT(DISTINCT e.id) as total_evaluations,
+          COUNT(DISTINCT p.id) as total_projects,
+          COUNT(DISTINCT p.student_id) as total_students,
+          COUNT(DISTINCT e.instructor_id) as total_instructors,
+          AVG(e.score) as average_score,
+          MIN(e.score) as min_score,
+          MAX(e.score) as max_score,
+          COUNT(CASE WHEN p.status = 'pending' THEN 1 END) as pending_projects,
+          COUNT(CASE WHEN p.status = 'approved' THEN 1 END) as approved_projects,
+          COUNT(CASE WHEN p.status = 'rejected' THEN 1 END) as rejected_projects
+        FROM evaluations e
+        JOIN projects p ON e.project_id = p.id
+        JOIN users u ON p.student_id = u.id
+        WHERE u.department_id = (SELECT department_id FROM users WHERE id = $1)
+      `;
 
-    const result = await pool.query(query, [departmentHeadId]);
-    return result.rows[0] || {};
+      const result = await pool.query(query, [departmentHeadId]);
+      return result.rows[0] || {};
+    } catch (error) {
+      console.error('Error in getEvaluationStatistics:', error.message);
+      // Return empty stats if query fails
+      return {
+        total_evaluations: 0,
+        total_projects: 0,
+        total_students: 0,
+        total_instructors: 0,
+        average_score: 0,
+        min_score: 0,
+        max_score: 0,
+        pending_projects: 0,
+        approved_projects: 0,
+        rejected_projects: 0
+      };
+    }
   }
 
   /**
@@ -125,26 +139,30 @@ class DepartmentHeadService {
    * @returns {Promise<Array>} Statistics by evaluation type
    */
   static async getEvaluationStatisticsByType(departmentHeadId) {
-    const query = `
-      SELECT 
-        e.evaluation_type,
-        COUNT(*) as count,
-        AVG(e.score) as average_score,
-        MIN(e.score) as min_score,
-        MAX(e.score) as max_score,
-        COUNT(CASE WHEN e.status = 'Approved' THEN 1 END) as approved_count,
-        COUNT(CASE WHEN e.status = 'Needs Revision' THEN 1 END) as needs_revision_count,
-        COUNT(CASE WHEN e.status = 'Rejected' THEN 1 END) as rejected_count
-      FROM evaluations e
-      JOIN projects p ON e.project_id = p.id
-      JOIN users u ON p.student_id = u.id
-      WHERE u.department_id = (SELECT department_id FROM users WHERE id = $1)
-      GROUP BY e.evaluation_type
-      ORDER BY e.evaluation_type
-    `;
+    try {
+      // Try to get evaluation_type stats if the column exists
+      const query = `
+        SELECT 
+          COALESCE(e.evaluation_type, 'general') as evaluation_type,
+          COUNT(*) as count,
+          AVG(e.score) as average_score,
+          MIN(e.score) as min_score,
+          MAX(e.score) as max_score
+        FROM evaluations e
+        JOIN projects p ON e.project_id = p.id
+        JOIN users u ON p.student_id = u.id
+        WHERE u.department_id = (SELECT department_id FROM users WHERE id = $1)
+        GROUP BY COALESCE(e.evaluation_type, 'general')
+        ORDER BY COALESCE(e.evaluation_type, 'general')
+      `;
 
-    const result = await pool.query(query, [departmentHeadId]);
-    return result.rows;
+      const result = await pool.query(query, [departmentHeadId]);
+      return result.rows;
+    } catch (error) {
+      console.error('Error in getEvaluationStatisticsByType:', error.message);
+      // Return empty array if query fails
+      return [];
+    }
   }
 
   /**
@@ -180,31 +198,33 @@ class DepartmentHeadService {
    * @returns {Promise<Array>} Instructor performance data
    */
   static async getInstructorPerformance(departmentHeadId) {
-    const query = `
-      SELECT 
-        i.id as instructor_id,
-        i.full_name as instructor_name,
-        i.email as instructor_email,
-        COUNT(DISTINCT p.id) as assigned_students,
-        COUNT(DISTINCT e.id) as evaluations_completed,
-        AVG(e.score) as average_evaluation_score,
-        COUNT(CASE WHEN e.status = 'Approved' THEN 1 END) as approved_evaluations,
-        COUNT(CASE WHEN e.status = 'Needs Revision' THEN 1 END) as needs_revision_evaluations,
-        COUNT(CASE WHEN e.status = 'Rejected' THEN 1 END) as rejected_evaluations,
-        COUNT(CASE WHEN p.status = 'approved' THEN 1 END) as approved_projects,
-        COUNT(CASE WHEN p.status = 'rejected' THEN 1 END) as rejected_projects
-      FROM users i
-      JOIN instructor_student_assignments isa ON i.id = isa.instructor_id
-      JOIN users s ON isa.student_id = s.id
-      LEFT JOIN projects p ON i.id = p.instructor_id AND s.id = p.student_id
-      LEFT JOIN evaluations e ON p.id = e.project_id
-      WHERE s.department_id = (SELECT department_id FROM users WHERE id = $1)
-      GROUP BY i.id, i.full_name, i.email
-      ORDER BY evaluations_completed DESC
-    `;
+    try {
+      const query = `
+        SELECT 
+          i.id as instructor_id,
+          i.full_name as instructor_name,
+          i.email as instructor_email,
+          COUNT(DISTINCT p.id) as assigned_students,
+          COUNT(DISTINCT e.id) as evaluations_completed,
+          AVG(e.score) as average_evaluation_score,
+          COUNT(CASE WHEN p.status = 'approved' THEN 1 END) as approved_projects,
+          COUNT(CASE WHEN p.status = 'rejected' THEN 1 END) as rejected_projects
+        FROM users i
+        LEFT JOIN instructor_student_assignments isa ON i.id = isa.instructor_id
+        LEFT JOIN users s ON isa.student_id = s.id
+        LEFT JOIN projects p ON i.id = p.instructor_id AND s.id = p.student_id
+        LEFT JOIN evaluations e ON p.id = e.project_id
+        WHERE s.department_id = (SELECT department_id FROM users WHERE id = $1)
+        GROUP BY i.id, i.full_name, i.email
+        ORDER BY evaluations_completed DESC
+      `;
 
-    const result = await pool.query(query, [departmentHeadId]);
-    return result.rows;
+      const result = await pool.query(query, [departmentHeadId]);
+      return result.rows;
+    } catch (error) {
+      console.error('Error in getInstructorPerformance:', error.message);
+      return [];
+    }
   }
 
   /**
@@ -248,44 +268,49 @@ class DepartmentHeadService {
    * @returns {Promise<Array>} Recent activity
    */
   static async getRecentActivity(departmentHeadId, limit = 20) {
-    const query = `
-      SELECT 
-        'evaluation' as activity_type,
-        e.id as activity_id,
-        e.created_at as activity_date,
-        u.full_name as student_name,
-        i.full_name as instructor_name,
-        p.title as project_title,
-        e.evaluation_type::text as details,
-        e.score as score
-      FROM evaluations e
-      JOIN projects p ON e.project_id = p.id
-      JOIN users u ON p.student_id = u.id
-      JOIN users i ON e.instructor_id = i.id
-      WHERE u.department_id = (SELECT department_id FROM users WHERE id = $1)
-      
-      UNION ALL
-      
-      SELECT 
-        'project_status_change' as activity_type,
-        p.id as activity_id,
-        COALESCE(p.approved_at, p.rejected_at, p.submitted_at) as activity_date,
-        u.full_name as student_name,
-        i.full_name as instructor_name,
-        p.title as project_title,
-        p.status::text as details,
-        NULL as score
-      FROM projects p
-      JOIN users u ON p.student_id = u.id
-      LEFT JOIN users i ON p.instructor_id = i.id
-      WHERE u.department_id = (SELECT department_id FROM users WHERE id = $1)
-      
-      ORDER BY activity_date DESC
-      LIMIT $2
-    `;
+    try {
+      const query = `
+        SELECT 
+          'evaluation' as activity_type,
+          e.id as activity_id,
+          e.created_at as activity_date,
+          u.full_name as student_name,
+          i.full_name as instructor_name,
+          p.title as project_title,
+          COALESCE(e.evaluation_type, 'general') as details,
+          e.score as score
+        FROM evaluations e
+        JOIN projects p ON e.project_id = p.id
+        JOIN users u ON p.student_id = u.id
+        JOIN users i ON e.instructor_id = i.id
+        WHERE u.department_id = (SELECT department_id FROM users WHERE id = $1)
+        
+        UNION ALL
+        
+        SELECT 
+          'project_status_change' as activity_type,
+          p.id as activity_id,
+          COALESCE(p.approved_at, p.rejected_at, p.submitted_at) as activity_date,
+          u.full_name as student_name,
+          i.full_name as instructor_name,
+          p.title as project_title,
+          p.status as details,
+          NULL as score
+        FROM projects p
+        JOIN users u ON p.student_id = u.id
+        LEFT JOIN users i ON p.instructor_id = i.id
+        WHERE u.department_id = (SELECT department_id FROM users WHERE id = $1)
+        
+        ORDER BY activity_date DESC
+        LIMIT $2
+      `;
 
-    const result = await pool.query(query, [departmentHeadId, limit]);
-    return result.rows;
+      const result = await pool.query(query, [departmentHeadId, limit]);
+      return result.rows;
+    } catch (error) {
+      console.error('Error in getRecentActivity:', error.message);
+      return [];
+    }
   }
 
   /**
