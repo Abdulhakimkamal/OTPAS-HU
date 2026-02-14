@@ -75,7 +75,11 @@ export default function InstructorSettings() {
         bio: `Department: ${profileData.department}` // Store department in bio field
       };
 
-      const response = await fetch('http://localhost:5000/api/instructor/profile', {
+      const backendUrl = process.env.NODE_ENV === 'production' 
+        ? 'https://otpas-hu-database.onrender.com'
+        : 'http://localhost:3000';
+
+      const response = await fetch(`${backendUrl}/api/instructor/profile`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -131,7 +135,11 @@ export default function InstructorSettings() {
         return;
       }
 
-      const response = await fetch('http://localhost:5000/api/instructor/settings/notifications', {
+      const backendUrl = process.env.NODE_ENV === 'production' 
+        ? 'https://otpas-hu-database.onrender.com'
+        : 'http://localhost:3000';
+
+      const response = await fetch(`${backendUrl}/api/instructor/settings/notifications`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -209,7 +217,11 @@ export default function InstructorSettings() {
 
       console.log('📤 Sending password change request...');
 
-      const response = await fetch('http://localhost:5000/api/instructor/change-password', {
+      const backendUrl = process.env.NODE_ENV === 'production' 
+        ? 'https://otpas-hu-database.onrender.com'
+        : 'http://localhost:3000';
+
+      const response = await fetch(`${backendUrl}/api/instructor/change-password`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
