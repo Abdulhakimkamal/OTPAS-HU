@@ -1,13 +1,5 @@
 services:
   - type: web
-    name: otpas-hu
-    env: static
-    plan: free
-    buildCommand: npm install && npm run build
-    publishDirectory: dist
-    envVars: []
-
-  - type: web
     name: otpas-hu-backend
     env: node
     plan: free
