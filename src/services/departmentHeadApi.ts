@@ -11,13 +11,13 @@ export const getStudents = async (params?: { page?: number; limit?: number; sear
   if (params?.limit) queryParams.append('limit', params.limit.toString());
   if (params?.search) queryParams.append('search', params.search);
   const queryString = queryParams.toString();
-  const endpoint = queryString ? `/department-head/students?${queryString}` : '/department-head/students';
+  const endpoint = queryString ? `/api/department-head/students?${queryString}` : '/api/department-head/students';
   
   return await api.get(endpoint);
 };
 
 export const getStudentById = async (id: number) => {
-  return await api.get(`/department-head/students/${id}`);
+  return await api.get(`/api/department-head/students/${id}`);
 };
 
 export const createStudent = async (data: {
@@ -27,7 +27,7 @@ export const createStudent = async (data: {
   password: string;
   phone?: string;
 }) => {
-  return await api.post('/department-head/students', data);
+  return await api.post('/api/department-head/students', data);
 };
 
 export const updateStudent = async (id: number, data: {
@@ -36,23 +36,23 @@ export const updateStudent = async (id: number, data: {
   phone?: string;
   is_active?: boolean;
 }) => {
-  return await api.put(`/department-head/students/${id}`, data);
+  return await api.put(`/api/department-head/students/${id}`, data);
 };
 
 export const updateStudentStatus = async (id: number, is_active: boolean) => {
-  return await api.patch(`/department-head/students/${id}/status`, { is_active });
+  return await api.patch(`/api/department-head/students/${id}/status`, { is_active });
 };
 
 export const resetStudentPassword = async (id: number, new_password: string) => {
-  return await api.patch(`/department-head/students/${id}/reset-password`, { new_password });
+  return await api.patch(`/api/department-head/students/${id}/reset-password`, { new_password });
 };
 
 export const getStudentProgress = async () => {
-  return await api.get('/department-head/students/progress');
+  return await api.get('/api/department-head/students/progress');
 };
 
 export const getStudentProgressById = async (studentId: number) => {
-  return await api.get(`/department-head/progress/${studentId}`);
+  return await api.get(`/api/department-head/progress/${studentId}`);
 };
 
 // ============================================
@@ -60,7 +60,7 @@ export const getStudentProgressById = async (studentId: number) => {
 // ============================================
 
 export const getCourses = async () => {
-  return await api.get('/department-head/courses');
+  return await api.get('/api/department-head/courses');
 };
 
 export const createCourse = async (data: {
@@ -73,7 +73,7 @@ export const createCourse = async (data: {
   academic_year: number;
   max_students?: number;
 }) => {
-  return await api.post('/department-head/courses', data);
+  return await api.post('/api/department-head/courses', data);
 };
 
 export const updateCourse = async (id: number, data: {
@@ -86,14 +86,14 @@ export const updateCourse = async (id: number, data: {
   max_students?: number;
   is_active?: boolean;
 }) => {
-  return await api.put(`/department-head/courses/${id}`, data);
+  return await api.put(`/api/department-head/courses/${id}`, data);
 };
 
 export const assignInstructor = async (data: {
   course_id: number;
   instructor_id: number;
 }) => {
-  return await api.post('/department-head/courses/assign-instructor', data);
+  return await api.post('/api/department-head/courses/assign-instructor', data);
 };
 
 // ============================================
@@ -101,7 +101,7 @@ export const assignInstructor = async (data: {
 // ============================================
 
 export const getInstructors = async () => {
-  return await api.get('/department-head/instructors');
+  return await api.get('/api/department-head/instructors');
 };
 
 // ============================================
@@ -109,7 +109,7 @@ export const getInstructors = async () => {
 // ============================================
 
 export const getEvaluations = async () => {
-  return await api.get('/department-head/evaluations');
+  return await api.get('/api/department-head/evaluations');
 };
 
 export const createEvaluation = async (data: {
@@ -120,7 +120,7 @@ export const createEvaluation = async (data: {
   max_score?: number;
   feedback?: string;
 }) => {
-  return await api.post('/department-head/evaluations', data);
+  return await api.post('/api/department-head/evaluations', data);
 };
 
 // ============================================
@@ -129,10 +129,10 @@ export const createEvaluation = async (data: {
 
 export const getReports = async () => {
   try {
-    console.log('getReports: Making API call to /department-head/reports');
+    console.log('getReports: Making API call to /api/department-head/reports');
     console.log('getReports: Auth token:', localStorage.getItem('authToken')?.substring(0, 20) + '...');
     
-    const response = await api.get('/department-head/reports');
+    const response = await api.get('/api/department-head/reports');
     console.log('getReports: Raw response received:', response);
     console.log('getReports: Response type:', typeof response);
     console.log('getReports: Response keys:', response ? Object.keys(response) : 'null/undefined');
@@ -150,15 +150,15 @@ export const getReports = async () => {
 };
 
 export const getStudentReports = async () => {
-  return await api.get('/department-head/reports/students');
+  return await api.get('/api/department-head/reports/students');
 };
 
 export const getCourseReports = async () => {
-  return await api.get('/department-head/reports/courses');
+  return await api.get('/api/department-head/reports/courses');
 };
 
 export const getDepartmentReport = async () => {
-  return await api.get('/department-head/reports/department');
+  return await api.get('/api/department-head/reports/department');
 };
 
 // ============================================
@@ -166,15 +166,15 @@ export const getDepartmentReport = async () => {
 // ============================================
 
 export const getAdvisorRecommendation = async (studentId: number) => {
-  return await api.get(`/department-head/recommend/advisor/${studentId}`);
+  return await api.get(`/api/department-head/recommend/advisor/${studentId}`);
 };
 
 export const getCourseRecommendation = async (studentId: number) => {
-  return await api.get(`/department-head/recommend/course/${studentId}`);
+  return await api.get(`/api/department-head/recommend/course/${studentId}`);
 };
 
 export const getRiskStudents = async () => {
-  return await api.get('/department-head/recommend/risk-students');
+  return await api.get('/api/department-head/recommend/risk-students');
 };
 
 // ============================================
@@ -182,7 +182,7 @@ export const getRiskStudents = async () => {
 // ============================================
 
 export const getFeedback = async () => {
-  return await api.get('/department-head/feedback');
+  return await api.get('/api/department-head/feedback');
 };
 
 export const createFeedback = async (data: {
@@ -193,7 +193,7 @@ export const createFeedback = async (data: {
   rating: number;
   is_anonymous?: boolean;
 }) => {
-  return await api.post('/department-head/feedback', data);
+  return await api.post('/api/department-head/feedback', data);
 };
 
 // ============================================
@@ -201,7 +201,7 @@ export const createFeedback = async (data: {
 // ============================================
 
 export const getProfile = async () => {
-  return await api.get('/department-head/profile');
+  return await api.get('/api/department-head/profile');
 };
 
 export const updateProfile = async (data: {
@@ -210,7 +210,7 @@ export const updateProfile = async (data: {
   bio?: string;
   profile_picture?: string;
 }) => {
-  return await api.put('/department-head/profile', data);
+  return await api.put('/api/department-head/profile', data);
 };
 
 // ============================================
@@ -221,7 +221,7 @@ export const changePassword = async (data: {
   currentPassword: string;
   newPassword: string;
 }) => {
-  return await api.put('/department-head/change-password', data);
+  return await api.put('/api/department-head/change-password', data);
 };
 
 
@@ -230,32 +230,32 @@ export const changePassword = async (data: {
 // ============================================
 
 export const getProgramEvaluationAnalytics = () => {
-  return api.get('/department-head/evaluation-analytics/program');
+  return api.get('/api/department-head/evaluation-analytics/program');
 };
 
 export const getCourseEvaluationAnalytics = () => {
-  return api.get('/department-head/evaluation-analytics/courses');
+  return api.get('/api/department-head/evaluation-analytics/courses');
 };
 
 export const getInstructorEvaluationAnalytics = () => {
-  return api.get('/department-head/evaluation-analytics/instructors');
+  return api.get('/api/department-head/evaluation-analytics/instructors');
 };
 
 export const getTrendAnalytics = () => {
-  return api.get('/department-head/evaluation-analytics/trends');
+  return api.get('/api/department-head/evaluation-analytics/trends');
 };
 
 export const getQualityMetrics = () => {
-  return api.get('/department-head/evaluation-analytics/quality');
+  return api.get('/api/department-head/evaluation-analytics/quality');
 };
 
 // ============================================
 // EVALUATION ANALYTICS (Department Head Oversight)
 // ============================================
-export const getEvaluationAnalytics = () => api.get('/department-head/evaluation-analytics');
+export const getEvaluationAnalytics = () => api.get('/api/department-head/evaluation-analytics');
 
 export const getCoursePerformanceComparison = (params?: { semester?: string; academic_year?: number }) => 
-  api.get('/department-head/course-performance-comparison', { params });
+  api.get('/api/department-head/course-performance-comparison', { params });
 
 export const getInstructorPerformanceComparison = () => 
-  api.get('/department-head/instructor-performance-comparison');
+  api.get('/api/department-head/instructor-performance-comparison');

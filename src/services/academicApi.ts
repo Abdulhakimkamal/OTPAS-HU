@@ -147,36 +147,36 @@ export const studentApi = {
 // Department Head API
 export const departmentHeadApi = {
   getEvaluationSummary: () =>
-    api.get<EvaluationSummary>('/department-head/evaluations/summary'),
+    api.get<EvaluationSummary>('/api/department-head/evaluations/summary'),
 
   getProjectOverview: () =>
-    api.get<any>('/department-head/projects/overview'),
+    api.get<any>('/api/department-head/projects/overview'),
 
   getEvaluationDetails: () =>
-    api.get<Evaluation[]>('/department-head/evaluations'),
+    api.get<Evaluation[]>('/api/department-head/evaluations'),
 
   getProjectDetails: () =>
-    api.get<Project[]>('/department-head/projects'),
+    api.get<Project[]>('/api/department-head/projects'),
 
   // Advisor Assignment
   assignAdvisor: (projectId: number, advisorId: number) =>
-    api.post<Project>(`/department-head/projects/${projectId}/assign-advisor`, { advisorId }),
+    api.post<Project>(`/api/department-head/projects/${projectId}/assign-advisor`, { advisorId }),
 
   removeAdvisor: (projectId: number) =>
-    api.delete<Project>(`/department-head/projects/${projectId}/remove-advisor`),
+    api.delete<Project>(`/api/department-head/projects/${projectId}/remove-advisor`),
 
   getAvailableInstructors: async () => {
-    const response = await api.get<{ success: boolean; data: any[] }>('/department-head/instructors');
+    const response = await api.get<{ success: boolean; data: any[] }>('/api/department-head/instructors');
     return response.data || [];
   },
 
   getUnassignedProjects: async () => {
-    const response = await api.get<{ success: boolean; data: any[] }>('/department-head/projects/unassigned');
+    const response = await api.get<{ success: boolean; data: any[] }>('/api/department-head/projects/unassigned');
     return response.data || [];
   },
 
   getProjectsWithAdvisors: async () => {
-    const response = await api.get<{ success: boolean; data: any[] }>('/department-head/projects/with-advisors');
+    const response = await api.get<{ success: boolean; data: any[] }>('/api/department-head/projects/with-advisors');
     return response.data || [];
   },
 };
