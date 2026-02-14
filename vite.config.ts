@@ -12,12 +12,12 @@ export default defineConfig(({ mode }) => ({
     },
     proxy: {
       '/api': {
-        target: mode === 'production' ? 'https://otpas-hu-backend.onrender.com' : 'http://localhost:3000',
+        target: mode === 'production' ? 'https://otpas-hu-database.onrender.com' : 'http://localhost:3000',
         changeOrigin: true,
         secure: false,
       },
       '/uploads': {
-        target: mode === 'production' ? 'https://otpas-hu-backend.onrender.com' : 'http://localhost:3000',
+        target: mode === 'production' ? 'https://otpas-hu-database.onrender.com' : 'http://localhost:3000',
         changeOrigin: true,
         secure: false,
       },
