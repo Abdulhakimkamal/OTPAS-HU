@@ -32,12 +32,15 @@ app.use(helmet());
 // Configure CORS based on environment
 const getCorsOrigins = () => {
   const corsOrigin = process.env.CORS_ORIGIN || 'http://localhost:8080';
+  console.log('[CORS] CORS_ORIGIN env var:', corsOrigin);
+  
   const origins = [
     'http://localhost:8080',
     'http://localhost:8081',
     'http://127.0.0.1:8080',
     'http://127.0.0.1:8081',
     'https://otpas-hu.netlify.app',
+    'https://otpas-hu-frontend.onrender.com',
     /^http:\/\/192\.168\.\d+\.\d+:808[01]$/,
     /^http:\/\/10\.\d+\.\d+\.\d+:808[01]$/,
     /^http:\/\/172\.\d+\.\d+\.\d+:808[01]$/
@@ -50,6 +53,7 @@ const getCorsOrigins = () => {
     });
   }
   
+  console.log('[CORS] Allowed origins:', origins);
   return origins;
 };
 
