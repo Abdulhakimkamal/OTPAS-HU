@@ -169,7 +169,7 @@ export const getAnalytics = async () => {
 // ============================================
 
 export const getProfile = async () => {
-  const response = await api.get(`${BASE_URL}/profile`);
+  const response = await api.get('/auth/profile');
   return response;
 };
 
@@ -178,7 +178,7 @@ export const updateProfile = async (data: {
   phone?: string;
   bio?: string;
 }) => {
-  const response = await api.put(`${BASE_URL}/profile`, data);
+  const response = await api.put('/auth/profile', data);
   return response;
 };
 
@@ -186,7 +186,7 @@ export const changePassword = async (data: {
   current_password: string;
   new_password: string;
 }) => {
-  const response = await api.put(`${BASE_URL}/change-password`, data);
+  const response = await api.put('/auth/change-password', data);
   return response;
 };
 

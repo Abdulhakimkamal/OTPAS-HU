@@ -129,10 +129,10 @@ export const createEvaluation = async (data: {
 
 export const getReports = async () => {
   try {
-    console.log('getReports: Making API call to /api/department-head/reports');
+    console.log('getReports: Making API call to /api/department-head/evaluation-analytics');
     console.log('getReports: Auth token:', localStorage.getItem('authToken')?.substring(0, 20) + '...');
     
-    const response = await api.get('/api/department-head/reports');
+    const response = await api.get('/api/department-head/evaluation-analytics');
     console.log('getReports: Raw response received:', response);
     console.log('getReports: Response type:', typeof response);
     console.log('getReports: Response keys:', response ? Object.keys(response) : 'null/undefined');
@@ -150,15 +150,15 @@ export const getReports = async () => {
 };
 
 export const getStudentReports = async () => {
-  return await api.get('/api/department-head/reports/students');
+  return await api.get('/api/department-head/statistics/evaluations');
 };
 
 export const getCourseReports = async () => {
-  return await api.get('/api/department-head/reports/courses');
+  return await api.get('/api/department-head/statistics/evaluations/by-type');
 };
 
 export const getDepartmentReport = async () => {
-  return await api.get('/api/department-head/reports/department');
+  return await api.get('/api/department-head/dashboard');
 };
 
 // ============================================
@@ -201,7 +201,7 @@ export const createFeedback = async (data: {
 // ============================================
 
 export const getProfile = async () => {
-  return await api.get('/api/department-head/profile');
+  return await api.get('/auth/profile');
 };
 
 export const updateProfile = async (data: {
@@ -210,7 +210,7 @@ export const updateProfile = async (data: {
   bio?: string;
   profile_picture?: string;
 }) => {
-  return await api.put('/api/department-head/profile', data);
+  return await api.put('/auth/profile', data);
 };
 
 // ============================================
@@ -221,7 +221,7 @@ export const changePassword = async (data: {
   currentPassword: string;
   newPassword: string;
 }) => {
-  return await api.put('/api/department-head/change-password', data);
+  return await api.put('/auth/change-password', data);
 };
 
 
