@@ -61,9 +61,7 @@ const corsOptions = {
       callback(null, true);
     } else {
       console.log('[CORS] Origin not allowed:', origin);
-      // Don't reject - allow the request but without CORS headers
-      // This lets the browser handle the CORS error
-      callback(null, false);
+      callback(new Error('Not allowed by CORS'));
     }
   },
   credentials: true,
