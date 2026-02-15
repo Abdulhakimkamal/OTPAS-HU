@@ -87,20 +87,20 @@ export interface Recommendation {
 class StudentApiService {
   // Dashboard
   async getDashboardStats(): Promise<DashboardStats> {
-    const response = await api.get<{ success: boolean; stats: DashboardStats }>('/student/dashboard');
+    const response = await api.get<{ success: boolean; stats: DashboardStats }>('/api/student/dashboard');
     return response.stats;
   }
 
   // Announcements
   async getAnnouncements(): Promise<Announcement[]> {
-    const response = await api.get<{ success: boolean; announcements: Announcement[] }>('/student/announcements');
+    const response = await api.get<{ success: boolean; announcements: Announcement[] }>('/api/student/announcements');
     return response.announcements;
   }
 
   // Learning Materials (now through tutorials)
   async getLearningMaterials(): Promise<CourseMaterial[]> {
     // Materials are now accessed through tutorial files
-    const response = await api.get<{ success: boolean; tutorials: Tutorial[] }>('/student/tutorials');
+    const response = await api.get<{ success: boolean; tutorials: Tutorial[] }>('/api/student/tutorials');
     
     // Transform tutorials with files into materials format for backward compatibility
     const materials: CourseMaterial[] = [];
@@ -127,7 +127,7 @@ class StudentApiService {
 
   // Project Submissions
   async getProjectSubmissions(): Promise<ProjectSubmission[]> {
-    const response = await api.get<{ success: boolean; projects: ProjectSubmission[] }>('/student/project-submissions');
+    const response = await api.get<{ success: boolean; projects: ProjectSubmission[] }>('/api/student/project-submissions');
     return response.projects;
   }
 
@@ -137,19 +137,19 @@ class StudentApiService {
     course_id: number;
     file_url: string;
   }): Promise<ProjectSubmission> {
-    const response = await api.post<{ success: boolean; project: ProjectSubmission }>('/student/projects/submit', projectData);
+    const response = await api.post<{ success: boolean; project: ProjectSubmission }>('/api/student/projects/submit', projectData);
     return response.project;
   }
 
   // Tutorials
   async getTutorials(courseId?: number): Promise<Tutorial[]> {
-    const endpoint = courseId ? `/student/tutorials?course_id=${courseId}` : '/student/tutorials';
+    const endpoint = courseId ? `/api/student/tutorials?course_id=${courseId}` : '/api/student/tutorials';
     const response = await api.get<{ success: boolean; data: Tutorial[] }>(endpoint);
     return response.data || [];
   }
 
   async getTutorialById(id: number): Promise<Tutorial> {
-    const response = await api.get<{ success: boolean; data: Tutorial }>(`/student/tutorials/${id}`);
+    const response = await api.get<{ success: boolean; data: Tutorial }>(`/api/student/tutorials/${id}`);
     return response.data;
   }
 
@@ -158,22 +158,22 @@ class StudentApiService {
     time_spent_minutes: number;
     is_completed: boolean;
   }): Promise<void> {
-    await api.post(`/student/tutorials/${id}/progress`, progress);
+    await api.post(`/api/student/tutorials/${id}/progress`, progress);
   }
 
   async markTutorialComplete(id: number): Promise<void> {
-    await api.post(`/student/tutorials/${id}/complete`, {});
+    await api.post(`/api/student/tutorials/${id}/complete`, {});
   }
 
   // Progress
   async getProgress(): Promise<StudentProgress> {
-    const response = await api.get<{ success: boolean; progress: StudentProgress }>('/student/progress');
+    const response = await api.get<{ success: boolean; progress: StudentProgress }>('/api/student/progress');
     return response.progress;
   }
 
   // Recommendations
   async getRecommendations(): Promise<Recommendation[]> {
-    const response = await api.get<{ success: boolean; recommendations: Recommendation[] }>('/student/recommendations');
+    const response = await api.get<{ success: boolean; recommendations: Recommendation[] }>('/api/student/recommendations');
     return response.recommendations;
   }
 
@@ -183,18 +183,18 @@ class StudentApiService {
     rating: number;
     tutorial_id: number;
   }): Promise<void> {
-    await api.post('/student/feedback', feedbackData);
+    await api.post('/api/student/feedback', feedbackData);
   }
 
   // Projects
   async getProjects(): Promise<ProjectSubmission[]> {
-    const response = await api.get<{ success: boolean; projects: ProjectSubmission[] }>('/student/projects');
+    const response = await api.get<{ success: boolean; projects: ProjectSubmission[] }>('/api/student/projects');
     return response.projects;
   }
 
   // Evaluations
   async getEvaluations(): Promise<any[]> {
-    const response = await api.get<{ success: boolean; evaluations: any[] }>('/student/evaluations');
+    const response = await api.get<{ success: boolean; evaluations: any[] }>('/api/student/evaluations');
     return response.evaluations;
   }
 }

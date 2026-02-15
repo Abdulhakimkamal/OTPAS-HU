@@ -21,7 +21,7 @@ class ProjectModel {
     
     const query = `
       INSERT INTO projects (student_id, instructor_id, title, description, status, submitted_at)
-      VALUES ($1, $2, $3, $4, 'pending', CURRENT_TIMESTAMP)
+      VALUES ($1, $2, $3, $4, 'draft', CURRENT_TIMESTAMP)
       RETURNING *
     `;
     
@@ -105,7 +105,7 @@ class ProjectModel {
              EXTRACT(DAY FROM (CURRENT_TIMESTAMP - p.submitted_at)) as days_pending
       FROM projects p
       LEFT JOIN users s ON p.student_id = s.id
-      WHERE p.instructor_id = $1 AND p.status = 'pending'
+      WHERE p.instructor_id = $1 AND p.status = 'submitted'
       ORDER BY p.submitted_at ASC
     `;
     

@@ -99,7 +99,7 @@ class DepartmentHeadService {
           AVG(e.score) as average_score,
           MIN(e.score) as min_score,
           MAX(e.score) as max_score,
-          COUNT(CASE WHEN p.status = 'pending' THEN 1 END) as pending_projects,
+          COUNT(CASE WHEN p.status = 'draft' THEN 1 END) as draft_projects,
           COUNT(CASE WHEN p.status = 'approved' THEN 1 END) as approved_projects,
           COUNT(CASE WHEN p.status = 'rejected' THEN 1 END) as rejected_projects
         FROM evaluations e

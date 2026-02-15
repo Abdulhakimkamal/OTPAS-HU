@@ -98,9 +98,9 @@ class ProjectService {
       throw new Error(`Instructor ${instructorId} is not assigned to this project`);
     }
 
-    // Verify project is in pending status
-    if (project.status !== 'pending') {
-      throw new Error(`Project ${projectId} is not in pending status. Current status: ${project.status}`);
+    // Verify project is in draft status
+    if (project.status !== 'draft') {
+      throw new Error(`Project ${projectId} is not in draft status. Current status: ${project.status}`);
     }
 
     // Update project status to approved
@@ -141,9 +141,9 @@ class ProjectService {
       throw new Error(`Instructor ${instructorId} is not assigned to this project`);
     }
 
-    // Verify project is in pending status
-    if (project.status !== 'pending') {
-      throw new Error(`Project ${projectId} is not in pending status. Current status: ${project.status}`);
+    // Verify project is in draft status
+    if (project.status !== 'draft') {
+      throw new Error(`Project ${projectId} is not in draft status. Current status: ${project.status}`);
     }
 
     // Update project status to rejected

@@ -286,11 +286,11 @@ class MessageModel {
     
     const { sender_role, sender_dept, receiver_role, receiver_dept } = result.rows[0];
     
-    // Admin and super_admin cannot send academic messages
-    if (['admin', 'super_admin'].includes(sender_role)) return false;
-    if (['admin', 'super_admin'].includes(receiver_role)) return false;
+    // Admin and super_admin CAN message other users
+    if (['admin', 'super_admin'].includes(sender_role)) return true;
+    if (['admin', 'super_admin'].includes(receiver_role)) return true;
     
-    // Must be in same department
+    // Must be in same department for non-admin users
     if (sender_dept !== receiver_dept) return false;
     
     // Department head can message instructors and students

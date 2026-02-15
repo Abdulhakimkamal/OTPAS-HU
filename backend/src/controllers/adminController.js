@@ -1457,3 +1457,127 @@ export const getSingleSetting = async (req, res) => {
     });
   }
 };
+
+// ============================================
+// ADDITIONAL ADMIN METHODS (CRITICAL FIXES)
+// ============================================
+
+/**
+ * Get system reports - aggregated data for admin dashboard
+ */
+export const getSystemReportsEnhanced = async (req, res) => {
+  try {
+    const [userStats, deptStats, projectStats, activityStats] = await Promise.all([
+      pool.query(`SELECT r.name as role, COUNT(u.id) as count 
+                  FROM users u 
+                  JOIN roles r ON u.role_id = r.id 
+                  GROUP BY r.name`),
+      pool.query(`SELECT d.name, COUNT(u.id) as user_count 
+                  FROM departments d 
+                  LEFT JOIN users u ON d.id = u.department_id 
+                  GROUP BY d.id, d.name`),
+      pool.query(`SELECT status, COUNT(*) as count FROM projects GROUP BY status`),
+      pool.query(`SELECT DATE(created_at) as date, COUNT(*) as count 
+                  FROM activity_logs 
+                  WHERE created_at >= NOW() - INTERVAL '30 days' 
+                  GROUP BY DATE(created_at) 
+                  ORDER BY date DESC`)
+    ]);
+
+    res.status(HTTP_STATUS.OK).json({
+      success: true,
+      data: {
+        userStats: userStats.rows,
+        departmentStats: deptStats.rows,
+        projectStats: projectStats.rows,
+        activityStats: activityStats.rows
+      }
+    });
+  } catch (error) {
+    console.error('Get system reports error:', error);
+    res.status(HTTP_STATUS.INTERNAL_ERROR).json({
+      success: false,
+      message: ERROR_MESSAGES.DATABASE_ERROR
+    });
+  }
+};
+
+/**
+ * Get login history - track user login attempts
+ */
+export const getLoginHistoryEnhanced = async (req, res) => {
+  try {
+    const { user_id, limit = 50 } = req.query;
+
+    let query = `SELECT lh.*, u.full_name, u.email 
+                 FROM login_history lh 
+                 JOIN users u ON lh.user_id = u.id`;
+    const params = [];
+
+    if (user_id) {
+      query += ` WHERE lh.user_id = $1`;
+      params.push(user_id);
+    }
+
+    query += ` ORDER BY lh.login_time DESC LIMIT ${params.length + 1}`;
+    params.push(limit);
+
+    const result = await pool.query(query, params);
+
+    res.status(HTTP_STATUS.OK).json({
+      success: true,
+      data: result.rows
+    });
+  } catch (error) {
+    console.error('Get login history error:', error);
+    res.status(HTTP_STATUS.INTERNAL_ERROR).json({
+      success: false,
+      message: ERROR_MESSAGES.DATABASE_ERROR
+    });
+  }
+};
+
+/**
+ * Get activity logs - audit trail of system actions
+ */
+export const getActivityLogsEnhanced = async (req, res) => {
+  try {
+    const { user_id, action, limit = 100 } = req.query;
+
+    let query = `SELECT al.*, u.full_name, u.email 
+                 FROM activity_logs al 
+                 JOIN users u ON al.user_id = u.id`;
+    const params = [];
+    const conditions = [];
+
+    if (user_id) {
+      conditions.push(`al.user_id = $${params.length + 1}`);
+      params.push(user_id);
+    }
+
+    if (action) {
+      conditions.push(`al.action ILIKE $${params.length + 1}`);
+      params.push(`%${action}%`);
+    }
+
+    if (conditions.length > 0) {
+      query += ` WHERE ${conditions.join(' AND ')}`;
+    }
+
+    query += ` ORDER BY al.created_at DESC LIMIT $${params.length + 1}`;
+    params.push(limit);
+
+    const result = await pool.query(query, params);
+
+    res.status(HTTP_STATUS.OK).json({
+      success: true,
+      data: result.rows
+    });
+  } catch (error) {
+    console.error('Get activity logs error:', error);
+    res.status(HTTP_STATUS.INTERNAL_ERROR).json({
+      success: false,
+      message: ERROR_MESSAGES.DATABASE_ERROR
+    });
+  }
+};

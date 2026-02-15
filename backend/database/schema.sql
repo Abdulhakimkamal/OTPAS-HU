@@ -180,6 +180,22 @@ CREATE TABLE IF NOT EXISTS evaluations (
   CONSTRAINT check_score CHECK (score >= 0 AND score <= max_score)
 );
 
+-- Course Evaluations Table (for course-based evaluations)
+CREATE TABLE IF NOT EXISTS course_evaluations (
+  id SERIAL PRIMARY KEY,
+  student_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  course_id INTEGER NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
+  instructor_id INTEGER NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
+  score DECIMAL(5, 2) NOT NULL,
+  grade VARCHAR(2),
+  feedback TEXT,
+  evaluation_type VARCHAR(50) DEFAULT 'quiz' CHECK (evaluation_type IN ('quiz', 'mid_exam', 'final_exam', 'project', 'assignment')),
+  status VARCHAR(50) DEFAULT 'completed' CHECK (status IN ('pending', 'completed', 'reviewed')),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT check_course_eval_score CHECK (score >= 0 AND score <= 100)
+);
+
 -- Feedback Table (Tutorial/Course Feedback)
 CREATE TABLE IF NOT EXISTS feedback (
   id SERIAL PRIMARY KEY,
@@ -356,6 +372,13 @@ CREATE INDEX IF NOT EXISTS idx_projects_created_at ON projects(created_at);
 CREATE INDEX IF NOT EXISTS idx_evaluations_project_id ON evaluations(project_id);
 CREATE INDEX IF NOT EXISTS idx_evaluations_student_id ON evaluations(student_id);
 CREATE INDEX IF NOT EXISTS idx_evaluations_instructor_id ON evaluations(instructor_id);
+
+-- Course Evaluation Indexes
+CREATE INDEX IF NOT EXISTS idx_course_evaluations_student_id ON course_evaluations(student_id);
+CREATE INDEX IF NOT EXISTS idx_course_evaluations_course_id ON course_evaluations(course_id);
+CREATE INDEX IF NOT EXISTS idx_course_evaluations_instructor_id ON course_evaluations(instructor_id);
+CREATE INDEX IF NOT EXISTS idx_course_evaluations_evaluation_type ON course_evaluations(evaluation_type);
+CREATE INDEX IF NOT EXISTS idx_course_evaluations_status ON course_evaluations(status);
 
 -- Feedback Indexes
 CREATE INDEX IF NOT EXISTS idx_feedback_student_id ON feedback(student_id);

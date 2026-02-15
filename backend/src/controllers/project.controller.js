@@ -80,7 +80,7 @@ class ProjectController {
         });
       }
 
-      if (error.message.includes('not assigned') || error.message.includes('not in pending status')) {
+      if (error.message.includes('not assigned') || error.message.includes('not in draft status')) {
         return res.status(HTTP_STATUS.FORBIDDEN).json({
           success: false,
           message: error.message
@@ -126,7 +126,7 @@ class ProjectController {
         });
       }
 
-      if (error.message.includes('not assigned') || error.message.includes('not in pending status')) {
+      if (error.message.includes('not assigned') || error.message.includes('not in draft status')) {
         return res.status(HTTP_STATUS.FORBIDDEN).json({
           success: false,
           message: error.message

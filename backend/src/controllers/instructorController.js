@@ -23,7 +23,7 @@ export const getAssignedStudents = async (req, res) => {
       FROM users u
       LEFT JOIN departments d ON u.department_id = d.id
       INNER JOIN courses c ON c.instructor_id = $1
-      INNER JOIN enrollments e ON e.course_id = c.id AND e.student_id = u.id
+      INNER JOIN course_enrollments e ON e.course_id = c.id AND e.student_id = u.id
       WHERE u.role_id = (SELECT id FROM roles WHERE name = 'student')
       ORDER BY u.full_name
     `;
@@ -52,7 +52,7 @@ export const getStudentById = async (req, res) => {
     const accessCheck = `
       SELECT COUNT(*) as count
       FROM courses c
-      INNER JOIN enrollments e ON e.course_id = c.id
+      INNER JOIN course_enrollments e ON e.course_id = c.id
       WHERE c.instructor_id = $1 AND e.student_id = $2
     `;
     
@@ -112,7 +112,7 @@ export const getStudentProgress = async (req, res) => {
     const accessCheck = `
       SELECT COUNT(*) as count
       FROM courses c
-      INNER JOIN enrollments e ON e.course_id = c.id
+      INNER JOIN course_enrollments e ON e.course_id = c.id
       WHERE c.instructor_id = $1 AND e.student_id = $2
     `;
     
@@ -131,11 +131,11 @@ export const getStudentProgress = async (req, res) => {
         c.code as course_code,
         e.grade,
         e.status,
-        e.enrolled_at
-      FROM enrollments e
+        e.enrollment_date
+      FROM course_enrollments e
       INNER JOIN courses c ON c.id = e.course_id
       WHERE e.student_id = $1 AND c.instructor_id = $2
-      ORDER BY e.enrolled_at DESC
+      ORDER BY e.enrollment_date DESC
     `;
 
     const result = await pool.query(query, [id, instructor_id]);
@@ -204,7 +204,7 @@ export const createEvaluation = async (req, res) => {
 
     // Verify student is enrolled in the course
     const enrollmentCheck = await pool.query(
-      'SELECT id FROM enrollments WHERE student_id = $1 AND course_id = $2',
+      'SELECT id FROM course_enrollments WHERE student_id = $1 AND course_id = $2',
       [student_id, course_id]
     );
 
@@ -640,7 +640,7 @@ export const getReports = async (req, res) => {
         AVG(ce.score) as average_score,
         COUNT(ce.id) as total_evaluations
       FROM courses c
-      LEFT JOIN enrollments e ON e.course_id = c.id
+      LEFT JOIN course_enrollments e ON e.course_id = c.id
       LEFT JOIN course_evaluations ce ON ce.course_id = c.id
       WHERE c.instructor_id = $1
       GROUP BY c.id, c.title, c.code
@@ -673,7 +673,7 @@ export const getAnalytics = async (req, res) => {
         COUNT(DISTINCT CASE WHEN ce.evaluation_type = 'project' THEN ce.id END) as total_projects,
         COUNT(DISTINCT ce.id) as total_evaluations
       FROM courses c
-      LEFT JOIN enrollments e ON e.course_id = c.id
+      LEFT JOIN course_enrollments e ON e.course_id = c.id
       LEFT JOIN course_evaluations ce ON ce.course_id = c.id
       WHERE c.instructor_id = $1
     `;
@@ -831,7 +831,7 @@ export const getMyCourses = async (req, res) => {
         COUNT(DISTINCT e.student_id) as enrolled_students
       FROM courses c
       LEFT JOIN departments d ON d.id = c.department_id
-      LEFT JOIN enrollments e ON e.course_id = c.id
+      LEFT JOIN course_enrollments e ON e.course_id = c.id
       WHERE c.instructor_id = $1
       GROUP BY c.id, c.title, c.code, c.description, c.department_id, c.instructor_id, c.credits, c.semester, c.academic_year, c.max_students, c.enrolled_count, c.is_active, c.created_at, c.updated_at, d.name
       ORDER BY c.semester DESC, c.title
