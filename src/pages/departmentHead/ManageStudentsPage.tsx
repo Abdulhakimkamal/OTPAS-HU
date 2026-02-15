@@ -448,7 +448,7 @@ export default function ManageStudentsPage() {
                     <TableCell>{student.username}</TableCell>
                     <TableCell>
                       <div className="flex flex-wrap gap-1">
-                        {student.enrolled_courses && student.enrolled_courses.length > 0 ? (
+                        {Array.isArray(student.enrolled_courses) && student.enrolled_courses.length > 0 ? (
                           student.enrolled_courses.map((course, index) => (
                             <Badge key={index} variant="outline" className="text-xs">
                               {course}
@@ -711,7 +711,7 @@ export default function ManageStudentsPage() {
             <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
               <h4 className="font-medium text-blue-900 mb-2">Current Enrollments</h4>
               <div className="flex flex-wrap gap-2">
-                {selectedStudent?.enrolled_courses && selectedStudent.enrolled_courses.length > 0 ? (
+                {Array.isArray(selectedStudent?.enrolled_courses) && selectedStudent.enrolled_courses.length > 0 ? (
                   selectedStudent.enrolled_courses.map((course, index) => (
                     <Badge key={index} variant="default" className="text-sm">
                       {course}
