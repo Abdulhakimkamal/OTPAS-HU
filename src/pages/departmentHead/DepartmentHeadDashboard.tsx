@@ -52,6 +52,8 @@ export default function DepartmentHeadDashboard() {
       
       if (response && response.success && apiData) {
         // Transform the API response to match the expected dashboard structure
+        const projectsByStatus = Array.isArray(apiData.projects_by_status) ? apiData.projects_by_status : [];
+        
         const transformedStats: DashboardStats = {
           departmentStats: {
             total_students: apiData.statistics?.total_students || 0,
@@ -65,9 +67,9 @@ export default function DepartmentHeadDashboard() {
           },
           projectStats: {
             total_projects: apiData.statistics?.total_projects || 0,
-            submitted_projects: apiData.projects_by_status?.find((p: any) => p.status === 'draft')?.count || 0,
-            approved_projects: apiData.projects_by_status?.find((p: any) => p.status === 'approved')?.count || 0,
-            rejected_projects: apiData.projects_by_status?.find((p: any) => p.status === 'rejected')?.count || 0,
+            submitted_projects: projectsByStatus.find((p: any) => p.status === 'draft')?.count || 0,
+            approved_projects: projectsByStatus.find((p: any) => p.status === 'approved')?.count || 0,
+            rejected_projects: projectsByStatus.find((p: any) => p.status === 'rejected')?.count || 0,
           },
           performanceStats: {
             avg_department_score: apiData.statistics?.average_score || 0,
