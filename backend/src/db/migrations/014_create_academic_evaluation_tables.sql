@@ -12,62 +12,16 @@
 -- Note: The 'pending' status was added to project_status enum in migration 013_5
 
 -- Add instructor_id column if it doesn't exist
-DO $$
-BEGIN
-  IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
-                 WHERE table_name='projects' AND column_name='instructor_id') THEN
-    ALTER TABLE projects ADD COLUMN instructor_id INTEGER REFERENCES users(id) ON DELETE RESTRICT;
-  END IF;
-END $$;
+ALTER TABLE projects ADD COLUMN IF NOT EXISTS instructor_id INTEGER REFERENCES users(id) ON DELETE RESTRICT;
 
 -- Add rejected_at column if it doesn't exist
-DO $$
-BEGIN
-  IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
-                 WHERE table_name='projects' AND column_name='rejected_at') THEN
-    ALTER TABLE projects ADD COLUMN rejected_at TIMESTAMP;
-  END IF;
-END $$;
-
--- Make description NOT NULL if it isn't already
-DO $$
-BEGIN
-  ALTER TABLE projects ALTER COLUMN description SET NOT NULL;
-EXCEPTION
-  WHEN others THEN
-    -- Column might already be NOT NULL or have NULL values
-    RAISE NOTICE 'Could not set description to NOT NULL: %', SQLERRM;
-END $$;
+ALTER TABLE projects ADD COLUMN IF NOT EXISTS rejected_at TIMESTAMP;
 
 -- Add check constraints if they don't exist
 DO $$
 BEGIN
   ALTER TABLE projects ADD CONSTRAINT check_title_not_empty 
     CHECK (LENGTH(TRIM(title)) > 0);
-EXCEPTION
-  WHEN duplicate_object THEN
-    NULL;
-END $$;
-
-DO $$
-BEGIN
-  -- First, update any existing projects with short descriptions
-  UPDATE projects 
-  SET description = COALESCE(description, '') || ' (Description updated for compliance with new requirements)'
-  WHERE description IS NULL OR LENGTH(description) < 20;
-  
-  -- Then add the constraint
-  ALTER TABLE projects ADD CONSTRAINT check_description_length 
-    CHECK (LENGTH(description) >= 20);
-EXCEPTION
-  WHEN duplicate_object THEN
-    NULL;
-END $$;
-
-DO $$
-BEGIN
-  ALTER TABLE projects ADD CONSTRAINT unique_student_title 
-    UNIQUE(student_id, title);
 EXCEPTION
   WHEN duplicate_object THEN
     NULL;
@@ -91,54 +45,15 @@ COMMENT ON COLUMN projects.rejected_at IS 'Timestamp when project title was reje
 -- ALTER EVALUATIONS TABLE
 -- ============================================
 -- Add evaluation_type column if it doesn't exist
-DO $$
-BEGIN
-  IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
-                 WHERE table_name='evaluations' AND column_name='evaluation_type') THEN
-    ALTER TABLE evaluations ADD COLUMN evaluation_type VARCHAR(50) NOT NULL DEFAULT 'tutorial_assignment'
-      CHECK (evaluation_type IN ('proposal', 'project_progress', 'final_project', 'tutorial_assignment'));
-  END IF;
-END $$;
+ALTER TABLE evaluations ADD COLUMN IF NOT EXISTS evaluation_type VARCHAR(50) NOT NULL DEFAULT 'tutorial_assignment'
+  CHECK (evaluation_type IN ('proposal', 'project_progress', 'final_project', 'tutorial_assignment'));
 
 -- Add recommendation column if it doesn't exist
-DO $$
-BEGIN
-  IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
-                 WHERE table_name='evaluations' AND column_name='recommendation') THEN
-    ALTER TABLE evaluations ADD COLUMN recommendation TEXT NOT NULL DEFAULT 'No recommendation provided';
-  END IF;
-END $$;
+ALTER TABLE evaluations ADD COLUMN IF NOT EXISTS recommendation TEXT NOT NULL DEFAULT 'No recommendation provided';
 
 -- Add status column if it doesn't exist
-DO $$
-BEGIN
-  IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
-                 WHERE table_name='evaluations' AND column_name='status') THEN
-    ALTER TABLE evaluations ADD COLUMN status VARCHAR(20) NOT NULL DEFAULT 'Approved'
-      CHECK (status IN ('Approved', 'Needs Revision', 'Rejected'));
-  END IF;
-END $$;
-
--- Make feedback NOT NULL if it isn't already
-DO $$
-BEGIN
-  ALTER TABLE evaluations ALTER COLUMN feedback SET NOT NULL;
-  ALTER TABLE evaluations ALTER COLUMN feedback SET DEFAULT '';
-EXCEPTION
-  WHEN others THEN
-    RAISE NOTICE 'Could not set feedback to NOT NULL: %', SQLERRM;
-END $$;
-
--- Update score constraint to be 0-100
-DO $$
-BEGIN
-  ALTER TABLE evaluations DROP CONSTRAINT IF EXISTS check_score;
-  ALTER TABLE evaluations ADD CONSTRAINT check_score 
-    CHECK (score >= 0 AND score <= 100);
-EXCEPTION
-  WHEN others THEN
-    RAISE NOTICE 'Score constraint update: %', SQLERRM;
-END $$;
+ALTER TABLE evaluations ADD COLUMN IF NOT EXISTS status VARCHAR(20) NOT NULL DEFAULT 'Approved'
+  CHECK (status IN ('Approved', 'Needs Revision', 'Rejected'));
 
 -- Add check constraints
 DO $$
@@ -175,40 +90,11 @@ COMMENT ON COLUMN evaluations.status IS 'Evaluation status: Approved, Needs Revi
 -- ============================================
 -- ALTER NOTIFICATIONS TABLE
 -- ============================================
--- The notifications table already exists with title, message, notification_type, etc.
--- We need to ensure it has the columns we need for our notification system
-
 -- Add user_id column if it doesn't exist (map from target_user_id)
-DO $$
-BEGIN
-  IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
-                 WHERE table_name='notifications' AND column_name='user_id') THEN
-    -- Add user_id column
-    ALTER TABLE notifications ADD COLUMN user_id INTEGER REFERENCES users(id) ON DELETE CASCADE;
-    
-    -- Copy data from target_user_id to user_id if target_user_id exists
-    IF EXISTS (SELECT 1 FROM information_schema.columns 
-               WHERE table_name='notifications' AND column_name='target_user_id') THEN
-      UPDATE notifications SET user_id = target_user_id WHERE user_id IS NULL;
-    END IF;
-  END IF;
-END $$;
+ALTER TABLE notifications ADD COLUMN IF NOT EXISTS user_id INTEGER REFERENCES users(id) ON DELETE CASCADE;
 
 -- Add type column if it doesn't exist (for backward compatibility)
-DO $$
-BEGIN
-  IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
-                 WHERE table_name='notifications' AND column_name='type') THEN
-    -- Use notification_type as type if it exists
-    ALTER TABLE notifications ADD COLUMN type VARCHAR(50);
-    
-    -- Copy data from notification_type to type if notification_type exists
-    IF EXISTS (SELECT 1 FROM information_schema.columns 
-               WHERE table_name='notifications' AND column_name='notification_type') THEN
-      UPDATE notifications SET type = notification_type WHERE type IS NULL;
-    END IF;
-  END IF;
-END $$;
+ALTER TABLE notifications ADD COLUMN IF NOT EXISTS type VARCHAR(50);
 
 -- Add check constraint for type
 DO $$
@@ -221,7 +107,6 @@ EXCEPTION
     NULL;
 END $$;
 
--- Ensure message column exists (it already does)
 -- Add check constraint for message
 DO $$
 BEGIN
@@ -318,80 +203,6 @@ CREATE TRIGGER trigger_evaluations_updated_at
 BEFORE UPDATE ON evaluations
 FOR EACH ROW
 EXECUTE FUNCTION update_updated_at_column();
-
--- ============================================
--- VIEWS FOR COMMON QUERIES
--- ============================================
-
--- View: Student project status with evaluation summary
-CREATE OR REPLACE VIEW v_student_project_status AS
-SELECT 
-  p.id as project_id,
-  p.student_id,
-  u.full_name as student_name,
-  u.email as student_email,
-  p.instructor_id,
-  i.full_name as instructor_name,
-  p.title,
-  p.description,
-  p.status,
-  p.submitted_at,
-  p.approved_at,
-  p.rejected_at,
-  COUNT(DISTINCT e.id) as evaluation_count,
-  AVG(e.score) as average_score,
-  COUNT(DISTINCT pf.id) as file_count
-FROM projects p
-JOIN users u ON p.student_id = u.id
-LEFT JOIN users i ON p.instructor_id = i.id
-LEFT JOIN evaluations e ON p.id = e.project_id
-LEFT JOIN project_files pf ON p.id = pf.project_id
-GROUP BY p.id, p.student_id, u.full_name, u.email, p.instructor_id, i.full_name, 
-         p.title, p.description, p.status, p.submitted_at, p.approved_at, p.rejected_at;
-
--- View: Instructor pending projects
-CREATE OR REPLACE VIEW v_instructor_pending_projects AS
-SELECT 
-  p.id as project_id,
-  p.student_id,
-  u.full_name as student_name,
-  u.email as student_email,
-  p.title,
-  p.description,
-  p.submitted_at,
-  EXTRACT(DAY FROM (CURRENT_TIMESTAMP - p.submitted_at)) as days_pending
-FROM projects p
-JOIN users u ON p.student_id = u.id
-WHERE p.status = 'pending'
-ORDER BY p.submitted_at ASC;
-
--- View: Evaluation summary for department heads
-CREATE OR REPLACE VIEW v_evaluation_summary AS
-SELECT 
-  e.id as evaluation_id,
-  e.project_id,
-  p.title as project_title,
-  p.student_id,
-  s.full_name as student_name,
-  s.department_id,
-  d.name as department_name,
-  e.instructor_id,
-  i.full_name as instructor_name,
-  e.evaluation_type,
-  e.score,
-  e.status as evaluation_status,
-  e.created_at as evaluated_at
-FROM evaluations e
-JOIN projects p ON e.project_id = p.id
-JOIN users s ON p.student_id = s.id
-JOIN users i ON e.instructor_id = i.id
-LEFT JOIN departments d ON s.department_id = d.id
-ORDER BY e.created_at DESC;
-
--- Comments on views
-COMMENT ON VIEW v_student_project_status IS 'Comprehensive view of student projects with evaluation summary';
-COMMENT ON VIEW v_instructor_pending_projects IS 'View of pending project titles for instructor approval';
-COMMENT ON VIEW v_evaluation_summary IS 'Summary view of evaluations for department head monitoring';
 
 -- ============================================
 -- END OF MIGRATION

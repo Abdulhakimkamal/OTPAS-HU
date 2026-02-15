@@ -65,14 +65,17 @@ export default function ManageCourses() {
       
       // API returns { success, data: [...] }
       if (coursesRes.success) {
-        const coursesList = coursesRes.data || coursesRes.courses || [];
+        const coursesList = (coursesRes.data || coursesRes.courses || []).map((course: any) => ({
+          ...course,
+          instructor_name: course.instructor_name || 'Not assigned'
+        }));
         setCourses(Array.isArray(coursesList) ? coursesList : []);
       } else {
         setCourses([]);
       }
       
       if (instructorsRes.success) {
-        const instructorsList = instructorsRes.data || instructorsRes.instructors || [];
+        const instructorsList = (instructorsRes.data || instructorsRes.instructors || []).filter((i: any) => i && i.id);
         console.log('Setting instructors:', instructorsList);
         setInstructors(Array.isArray(instructorsList) ? instructorsList : []);
       } else {

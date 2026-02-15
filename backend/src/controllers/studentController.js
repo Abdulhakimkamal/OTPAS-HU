@@ -227,7 +227,7 @@ export const getDashboardData = async (req, res) => {
 
     // Get enrolled courses count
     const coursesResult = await pool.query(
-      `SELECT COUNT(*) as count FROM enrollments WHERE student_id = $1`,
+      `SELECT COUNT(*) as count FROM course_enrollments WHERE student_id = $1`,
       [student_id]
     );
 
@@ -245,7 +245,7 @@ export const getDashboardData = async (req, res) => {
 
     // Calculate overall progress (mock calculation)
     const progressResult = await pool.query(
-      `SELECT AVG(progress_percentage) as avg_progress FROM course_progress WHERE student_id = $1`,
+      `SELECT AVG(completion_percentage) as avg_progress FROM course_progress WHERE student_id = $1`,
       [student_id]
     );
 
@@ -276,9 +276,9 @@ export const getAnnouncements = async (req, res) => {
 
     // Get student's department and enrolled courses
     const studentInfo = await pool.query(
-      `SELECT u.department_id, array_agg(DISTINCT e.course_id) as course_ids
+      `SELECT u.department_id, array_agg(DISTINCT ce.course_id) as course_ids
        FROM users u
-       LEFT JOIN enrollments e ON e.student_id = u.id
+       LEFT JOIN course_enrollments ce ON ce.student_id = u.id
        WHERE u.id = $1
        GROUP BY u.department_id`,
       [student_id]

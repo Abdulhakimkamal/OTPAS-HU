@@ -113,6 +113,11 @@ CREATE TABLE IF NOT EXISTS course_enrollments (
   UNIQUE(course_id, student_id)
 );
 
+-- Add missing columns to course_enrollments if they don't exist
+ALTER TABLE course_enrollments ADD COLUMN IF NOT EXISTS completion_percentage DECIMAL(5, 2) DEFAULT 0;
+ALTER TABLE course_enrollments ADD COLUMN IF NOT EXISTS is_completed BOOLEAN DEFAULT FALSE;
+ALTER TABLE course_enrollments ADD COLUMN IF NOT EXISTS completed_at TIMESTAMP;
+
 -- Tutorials Table
 CREATE TABLE IF NOT EXISTS tutorials (
   id SERIAL PRIMARY KEY,
@@ -131,6 +136,9 @@ CREATE TABLE IF NOT EXISTS tutorials (
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Add missing columns to tutorials if they don't exist
+ALTER TABLE tutorials ADD COLUMN IF NOT EXISTS is_published BOOLEAN DEFAULT FALSE;
+
 -- Tutorial Progress (Tracking)
 CREATE TABLE IF NOT EXISTS tutorial_progress (
   id SERIAL PRIMARY KEY,
@@ -142,6 +150,9 @@ CREATE TABLE IF NOT EXISTS tutorial_progress (
   completed_at TIMESTAMP,
   UNIQUE(tutorial_id, student_id)
 );
+
+-- Add missing columns to tutorial_progress if they don't exist
+ALTER TABLE tutorial_progress ADD COLUMN IF NOT EXISTS completion_percentage DECIMAL(5, 2) DEFAULT 0;
 
 -- Projects Table
 CREATE TABLE IF NOT EXISTS projects (
@@ -164,6 +175,11 @@ CREATE TABLE IF NOT EXISTS projects (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Add missing columns to projects if they don't exist
+ALTER TABLE projects ADD COLUMN IF NOT EXISTS advisor_id INTEGER REFERENCES users(id) ON DELETE SET NULL;
+ALTER TABLE projects ADD COLUMN IF NOT EXISTS assigned_by INTEGER REFERENCES users(id) ON DELETE SET NULL;
+ALTER TABLE projects ADD COLUMN IF NOT EXISTS assigned_at TIMESTAMP;
 
 -- Evaluations Table
 CREATE TABLE IF NOT EXISTS evaluations (
@@ -574,6 +590,162 @@ LEFT JOIN users u ON d.id = u.department_id
 LEFT JOIN courses c ON d.id = c.department_id
 LEFT JOIN projects p ON c.id = p.course_id
 GROUP BY d.id, d.name, d.code;
+
+-- ============================================
+-- MISSING TABLES - CRITICAL FOR APPLICATION
+-- ============================================
+
+-- Tutorial Files Table (File uploads for tutorials)
+CREATE TABLE IF NOT EXISTS tutorial_files (
+  id SERIAL PRIMARY KEY,
+  tutorial_id INTEGER NOT NULL REFERENCES tutorials(id) ON DELETE CASCADE,
+  file_name VARCHAR(255) NOT NULL,
+  file_path VARCHAR(500) NOT NULL,
+  file_type VARCHAR(50),
+  file_size INTEGER,
+  mime_type VARCHAR(100),
+  uploaded_by INTEGER NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
+  description TEXT,
+  is_active BOOLEAN DEFAULT TRUE,
+  download_count INTEGER DEFAULT 0,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_tutorial_files_tutorial_id ON tutorial_files(tutorial_id);
+CREATE INDEX IF NOT EXISTS idx_tutorial_files_uploaded_by ON tutorial_files(uploaded_by);
+
+-- Tutorial Videos Table (Video uploads for tutorials)
+CREATE TABLE IF NOT EXISTS tutorial_videos (
+  id SERIAL PRIMARY KEY,
+  tutorial_id INTEGER NOT NULL REFERENCES tutorials(id) ON DELETE CASCADE,
+  video_title VARCHAR(255) NOT NULL,
+  video_url VARCHAR(500) NOT NULL,
+  video_type VARCHAR(50),
+  duration_seconds INTEGER,
+  file_size INTEGER,
+  uploaded_by INTEGER NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
+  description TEXT,
+  is_active BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_tutorial_videos_tutorial_id ON tutorial_videos(tutorial_id);
+CREATE INDEX IF NOT EXISTS idx_tutorial_videos_uploaded_by ON tutorial_videos(uploaded_by);
+
+-- Instructor Student Assignments Table
+CREATE TABLE IF NOT EXISTS instructor_student_assignments (
+  id SERIAL PRIMARY KEY,
+  instructor_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  student_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  is_active BOOLEAN DEFAULT TRUE,
+  assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(instructor_id, student_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_instructor_student_assignments_instructor_id ON instructor_student_assignments(instructor_id);
+CREATE INDEX IF NOT EXISTS idx_instructor_student_assignments_student_id ON instructor_student_assignments(student_id);
+
+-- Enrollments Table (Alternative/Alias for course_enrollments)
+CREATE TABLE IF NOT EXISTS enrollments (
+  id SERIAL PRIMARY KEY,
+  student_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  course_id INTEGER NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
+  enrollment_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(student_id, course_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_enrollments_student_id ON enrollments(student_id);
+CREATE INDEX IF NOT EXISTS idx_enrollments_course_id ON enrollments(course_id);
+
+-- Course Progress Table (Tracks student progress in courses)
+CREATE TABLE IF NOT EXISTS course_progress (
+  id SERIAL PRIMARY KEY,
+  student_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  course_id INTEGER NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
+  progress_percentage DECIMAL(5, 2) DEFAULT 0,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(student_id, course_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_course_progress_student_id ON course_progress(student_id);
+CREATE INDEX IF NOT EXISTS idx_course_progress_course_id ON course_progress(course_id);
+
+-- Admin Announcements Table
+CREATE TABLE IF NOT EXISTS admin_announcements (
+  id SERIAL PRIMARY KEY,
+  title VARCHAR(255) NOT NULL,
+  message TEXT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  priority VARCHAR(20) DEFAULT 'normal',
+  is_active BOOLEAN DEFAULT TRUE
+);
+
+CREATE INDEX IF NOT EXISTS idx_admin_announcements_created_at ON admin_announcements(created_at);
+CREATE INDEX IF NOT EXISTS idx_admin_announcements_is_active ON admin_announcements(is_active);
+
+-- Department Announcements Table
+CREATE TABLE IF NOT EXISTS department_announcements (
+  id SERIAL PRIMARY KEY,
+  department_head_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  department_id INTEGER NOT NULL REFERENCES departments(id) ON DELETE CASCADE,
+  title VARCHAR(255) NOT NULL,
+  message TEXT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  priority VARCHAR(20) DEFAULT 'normal',
+  is_active BOOLEAN DEFAULT TRUE
+);
+
+CREATE INDEX IF NOT EXISTS idx_department_announcements_department_head_id ON department_announcements(department_head_id);
+CREATE INDEX IF NOT EXISTS idx_department_announcements_department_id ON department_announcements(department_id);
+CREATE INDEX IF NOT EXISTS idx_department_announcements_created_at ON department_announcements(created_at);
+
+-- Instructor Announcements Table
+CREATE TABLE IF NOT EXISTS instructor_announcements (
+  id SERIAL PRIMARY KEY,
+  instructor_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  course_id INTEGER REFERENCES courses(id) ON DELETE CASCADE,
+  title VARCHAR(255) NOT NULL,
+  message TEXT NOT NULL,
+  attachment_url VARCHAR(500),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  priority VARCHAR(20) DEFAULT 'medium',
+  is_active BOOLEAN DEFAULT TRUE
+);
+
+CREATE INDEX IF NOT EXISTS idx_instructor_announcements_instructor_id ON instructor_announcements(instructor_id);
+CREATE INDEX IF NOT EXISTS idx_instructor_announcements_course_id ON instructor_announcements(course_id);
+CREATE INDEX IF NOT EXISTS idx_instructor_announcements_created_at ON instructor_announcements(created_at);
+
+-- Course Instructors Table (Maps instructors to courses)
+CREATE TABLE IF NOT EXISTS course_instructors (
+  id SERIAL PRIMARY KEY,
+  course_id INTEGER NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
+  instructor_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  is_active BOOLEAN DEFAULT TRUE,
+  assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(course_id, instructor_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_course_instructors_course_id ON course_instructors(course_id);
+CREATE INDEX IF NOT EXISTS idx_course_instructors_instructor_id ON course_instructors(instructor_id);
+
+-- Project Files Table (Stores project file uploads)
+CREATE TABLE IF NOT EXISTS project_files (
+  id SERIAL PRIMARY KEY,
+  project_id INTEGER NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+  file_path VARCHAR(500) NOT NULL,
+  file_name VARCHAR(255) NOT NULL,
+  file_type VARCHAR(50),
+  file_size INTEGER,
+  uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_project_files_project_id ON project_files(project_id);
 
 -- ============================================
 -- ADMIN MODULE - ADDITIONAL SCHEMA

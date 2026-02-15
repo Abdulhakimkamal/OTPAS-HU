@@ -19,14 +19,17 @@ CREATE INDEX IF NOT EXISTS idx_instructor_student_assignments_student ON instruc
 CREATE INDEX IF NOT EXISTS idx_instructor_student_assignments_active ON instructor_student_assignments(is_active);
 
 -- Populate the table with existing instructor-student relationships from course enrollments
+-- Use course_enrollments if enrollments doesn't exist
 INSERT INTO instructor_student_assignments (instructor_id, student_id, is_active)
 SELECT DISTINCT 
   c.instructor_id,
-  e.student_id,
+  COALESCE(e.student_id, ce.student_id),
   TRUE
 FROM courses c
-INNER JOIN enrollments e ON e.course_id = c.id
+LEFT JOIN enrollments e ON e.course_id = c.id
+LEFT JOIN course_enrollments ce ON ce.course_id = c.id
 WHERE c.instructor_id IS NOT NULL
+AND (e.student_id IS NOT NULL OR ce.student_id IS NOT NULL)
 ON CONFLICT (instructor_id, student_id) DO NOTHING;
 
 -- Add comment

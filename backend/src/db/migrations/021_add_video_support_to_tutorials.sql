@@ -2,7 +2,7 @@
 -- Date: 2026-02-12
 -- Description: Extend tutorial_files table to support video uploads and video links
 
--- Add new columns to tutorial_files table
+-- Add new columns to tutorial_files table (only if they don't exist)
 ALTER TABLE tutorial_files ADD COLUMN IF NOT EXISTS file_type VARCHAR(50) DEFAULT 'document';
 ALTER TABLE tutorial_files ADD COLUMN IF NOT EXISTS video_url TEXT;
 ALTER TABLE tutorial_files ADD COLUMN IF NOT EXISTS thumbnail_url TEXT;
@@ -13,9 +13,14 @@ ALTER TABLE tutorial_files ADD COLUMN IF NOT EXISTS is_external BOOLEAN DEFAULT 
 CREATE INDEX IF NOT EXISTS idx_tutorial_files_type ON tutorial_files(file_type);
 CREATE INDEX IF NOT EXISTS idx_tutorial_files_external ON tutorial_files(is_external);
 
--- Add constraint to ensure either file_path or video_url is provided
-ALTER TABLE tutorial_files ADD CONSTRAINT check_file_or_video 
-  CHECK (file_path IS NOT NULL OR video_url IS NOT NULL);
+-- Add constraint to ensure either file_path or video_url is provided (only if it doesn't exist)
+DO $$
+BEGIN
+  ALTER TABLE tutorial_files ADD CONSTRAINT check_file_or_video 
+    CHECK (file_path IS NOT NULL OR video_url IS NOT NULL);
+EXCEPTION WHEN duplicate_object THEN
+  NULL;
+END $$;
 
 -- Update existing files to have file_type based on their extension
 UPDATE tutorial_files 
@@ -29,7 +34,7 @@ SET file_type = CASE
 END
 WHERE file_type = 'document';
 
--- Create tutorial_videos table for external video links
+-- Create tutorial_videos table for external video links (only if it doesn't exist)
 CREATE TABLE IF NOT EXISTS tutorial_videos (
   id SERIAL PRIMARY KEY,
   tutorial_id INTEGER NOT NULL REFERENCES tutorials(id) ON DELETE CASCADE,

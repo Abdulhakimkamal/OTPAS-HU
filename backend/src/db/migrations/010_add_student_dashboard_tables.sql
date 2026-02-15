@@ -92,6 +92,9 @@ CREATE TABLE IF NOT EXISTS instructor_announcements (
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Add priority column if it doesn't exist
+ALTER TABLE instructor_announcements ADD COLUMN IF NOT EXISTS priority VARCHAR(20) DEFAULT 'medium';
+
 -- Create indexes for instructor_announcements
 CREATE INDEX IF NOT EXISTS idx_instructor_announcements_instructor_id ON instructor_announcements(instructor_id);
 CREATE INDEX IF NOT EXISTS idx_instructor_announcements_course_id ON instructor_announcements(course_id);

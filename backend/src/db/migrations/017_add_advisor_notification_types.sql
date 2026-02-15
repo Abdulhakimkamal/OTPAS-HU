@@ -24,7 +24,3 @@ END $$;
 
 -- Update existing notifications if needed (optional)
 -- No data migration needed, just constraint update
-
--- Log the migration
-INSERT INTO migrations (name, executed_at) 
-VALUES ('017_add_advisor_notification_types', CURRENT_TIMESTAMP);

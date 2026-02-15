@@ -37,6 +37,13 @@ async function runMigrations() {
 
     // Get migration files
     const migrationsDir = path.join(__dirname, 'src/db/migrations');
+    
+    // Check if migrations directory exists
+    if (!fs.existsSync(migrationsDir)) {
+      console.log('[INFO] No migrations directory found - skipping migrations');
+      return;
+    }
+
     const files = fs.readdirSync(migrationsDir)
       .filter(file => file.endsWith('.sql'))
       .sort();
@@ -57,8 +64,22 @@ async function runMigrations() {
         const filepath = path.join(migrationsDir, file);
         const sql = fs.readFileSync(filepath, 'utf8');
         
-        // Execute migration
-        await pool.query(sql);
+        // Execute migration - split by semicolon to handle multiple statements
+        const statements = sql.split(';').filter(stmt => stmt.trim());
+        
+        for (const stmt of statements) {
+          if (stmt.trim()) {
+            try {
+              await pool.query(stmt);
+            } catch (err) {
+              // Log but continue - some statements might fail due to existing objects
+              if (!err.message.includes('already exists') && 
+                  !err.message.includes('duplicate key')) {
+                console.warn(`[WARNING] Migration ${file} statement error:`, err.message.substring(0, 80));
+              }
+            }
+          }
+        }
         
         // Record migration
         await pool.query(

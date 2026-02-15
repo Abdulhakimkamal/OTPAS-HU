@@ -82,11 +82,16 @@ export default function ManageStudentsPage() {
 
   useEffect(() => {
     // Filter students based on search term
-    const filtered = students.filter(student =>
-      (student.full_name?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
-      (student.email?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
-      (student.username?.toLowerCase() || '').includes(searchTerm.toLowerCase())
-    );
+    const filtered = students.filter(student => {
+      const fullName = (student.full_name || '').toLowerCase();
+      const email = (student.email || '').toLowerCase();
+      const username = (student.username || '').toLowerCase();
+      const searchLower = (searchTerm || '').toLowerCase();
+      
+      return fullName.includes(searchLower) || 
+             email.includes(searchLower) || 
+             username.includes(searchLower);
+    });
     setFilteredStudents(filtered);
     setCurrentPage(1); // Reset to first page on search
   }, [searchTerm, students]);

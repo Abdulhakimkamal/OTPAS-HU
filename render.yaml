@@ -18,6 +18,10 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: otpas-hu-db
+          property: connectionString
       - key: DB_HOST
         fromDatabase:
           name: otpas-hu-db
