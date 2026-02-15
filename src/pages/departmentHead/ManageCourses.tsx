@@ -63,15 +63,18 @@ export default function ManageCourses() {
       console.log('Courses response:', coursesRes);
       console.log('Instructors response:', instructorsRes);
       
-      if (coursesRes.success && coursesRes.courses) {
-        setCourses(Array.isArray(coursesRes.courses) ? coursesRes.courses : []);
+      // API returns { success, data: [...] }
+      if (coursesRes.success) {
+        const coursesList = coursesRes.data || coursesRes.courses || [];
+        setCourses(Array.isArray(coursesList) ? coursesList : []);
       } else {
         setCourses([]);
       }
       
-      if (instructorsRes.success && instructorsRes.instructors) {
-        console.log('Setting instructors:', instructorsRes.instructors);
-        setInstructors(Array.isArray(instructorsRes.instructors) ? instructorsRes.instructors : []);
+      if (instructorsRes.success) {
+        const instructorsList = instructorsRes.data || instructorsRes.instructors || [];
+        console.log('Setting instructors:', instructorsList);
+        setInstructors(Array.isArray(instructorsList) ? instructorsList : []);
       } else {
         console.log('No instructors data, setting empty array');
         setInstructors([]);

@@ -38,10 +38,12 @@ export default function MyCourses() {
 
   const loadCourses = async () => {
     try {
-      const data = await instructorApi.getMyCourses() as { success: boolean; courses: Course[] };
+      const data = await instructorApi.getMyCourses() as any;
       
-      if (data && data.courses) {
-        setCourses(data.courses || []);
+      // API returns { success, data: [...] }
+      if (data && data.success) {
+        const coursesList = data.data || data.courses || [];
+        setCourses(Array.isArray(coursesList) ? coursesList : []);
       } else {
         setCourses([]);
       }
